@@ -7,7 +7,6 @@ namespace einsum_ir::model::common {
   }
 
   void find_bounds_with_interpolation(const int* arr, int size, int val, int& idx_lower, double& t) {
-    // Exact match check
     const int* exact = std::lower_bound(arr, arr + size, val);
     if (exact != arr + size && *exact == val) {
       idx_lower = exact - arr;
@@ -15,10 +14,8 @@ namespace einsum_ir::model::common {
       return;
     }
 
-    // Find surrounding values
     const int* upper = std::upper_bound(arr, arr + size, val);
 
-    // Handle out of range with clamping
     if (upper == arr) {
       idx_lower = 0;
       t = 0.0;

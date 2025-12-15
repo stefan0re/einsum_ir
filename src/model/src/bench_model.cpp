@@ -26,7 +26,6 @@ int main(int argc, char** argv) {
   int trans_b = std::atoi(argv[5]);
   einsum_ir::model::common::Model model;
 
-  // Optional parameters for generic model
   double peak_gflops = 0.0;
   int vector_size = 0;
 
@@ -39,7 +38,6 @@ int main(int argc, char** argv) {
   } else if (std::strcmp(argv[6], "generic") == 0) {
     model = einsum_ir::model::common::Model::GENERIC;
 
-    // Parse optional generic parameters
     if (argc >= 8) {
       peak_gflops = std::atof(argv[7]);
     }
@@ -47,7 +45,6 @@ int main(int argc, char** argv) {
       vector_size = std::atoi(argv[8]);
     }
 
-    // Validate generic parameters
     if (peak_gflops <= 0.0 || vector_size <= 0) {
       std::cerr << "Error: For generic model, you must provide peak_gflops > 0 and vector_size > 0" << std::endl;
       return EXIT_FAILURE;
@@ -58,7 +55,6 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
-  // Warn if extra parameters provided for non-generic models
   if (model != einsum_ir::model::common::Model::GENERIC && argc > 7) {
     std::cerr << "Warning: Extra parameters ignored for non-generic models" << std::endl;
   }

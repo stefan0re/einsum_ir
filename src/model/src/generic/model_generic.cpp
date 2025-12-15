@@ -22,7 +22,7 @@ namespace einsum_ir::model::generic {
 
       double base_penalty = 0.5 * (1.0 - static_cast<double>(remainder) / static_cast<double>(kernel_m_size));
 
-      double penalty_reduction = 100.0;
+      double penalty_reduction = 1.0;
       if (num_kernels > 0) {
         penalty_reduction = 1.0 / (1.0 + num_kernels);
       }
