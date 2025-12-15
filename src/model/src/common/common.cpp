@@ -1,13 +1,5 @@
 #include "common.h"
 
-#include <chrono>
-#include <iostream>
-#include <random>
-
-#include "libxsmm.h"
-#include "m4/model_m4.h"
-#include "zen5/model_zen5.h"
-
 namespace einsum_ir::model::common {
 
   double get_time_model(int i_m,
@@ -15,7 +7,9 @@ namespace einsum_ir::model::common {
                         int i_k,
                         int i_trans_a,
                         int i_trans_b,
-                        Model i_model) {
+                        Model i_model,
+                        double i_peak_gflops,
+                        int i_vector_size) {
     double l_gflops = 1.0;
     switch (i_model) {
       case Model::ZEN5:
@@ -24,11 +18,11 @@ namespace einsum_ir::model::common {
       case Model::M4:
         l_gflops = einsum_ir::model::m4::get_interpolated_gflops(i_m, i_n, i_k, i_trans_b);
         break;
-      case Model::PI5:
-        // TODO: Implement PI5 model
+      case Model::A76:
+        l_gflops = einsum_ir::model::a76::get_interpolated_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b);
         break;
       case Model::GENERIC:
-        // TODO: Implement GENERIC model
+        l_gflops = einsum_ir::model::generic::get_interpolated_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b, i_peak_gflops, i_vector_size);
         break;
     }
     std::cout << "Model GFLOPS: " << l_gflops << std::endl;

@@ -16180,6 +16180,4 @@ namespace einsum_ir::model::m4 {
         {1684.75, 1824.03},
         {1742.15, 1899.76}}}};
 
-  const size_t table_size = sizeof(gflops_table) / sizeof(gflops_table[0]);
-
 }  // namespace einsum_ir::model::m4

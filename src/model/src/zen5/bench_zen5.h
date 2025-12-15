@@ -21,9 +21,6 @@ namespace einsum_ir::model::zen5 {
   //! GFLOPS table indexed by [m_idx][n_idx][k_idx][trans_a][trans_b]
   extern const double gflops_table[M_SIZE][N_SIZE][K_SIZE][2][2];
 
-  //! Total number of entries in the gflops table
-  extern const size_t table_size;
-
 }  // namespace einsum_ir::model::zen5
 
 #endif  // EINSUM_IR_MODEL_ZEN5_BENCH_ZEN5_H

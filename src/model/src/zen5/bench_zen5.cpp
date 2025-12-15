@@ -3724,6 +3724,4 @@ namespace einsum_ir::model::zen5 {
         {{266.485213, 263.801302},
          {254.289359, 251.648798}}}}};
 
-  const size_t table_size = sizeof(gflops_table) / sizeof(gflops_table[0]);
-
 }  // namespace einsum_ir::model::zen5

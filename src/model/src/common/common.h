@@ -1,6 +1,16 @@
 #ifndef EINSUM_IR_MODEL_COMMON_COMMON_H
 #define EINSUM_IR_MODEL_COMMON_COMMON_H
 
+#include <chrono>
+#include <iostream>
+#include <random>
+
+#include "a76/model_a76.h"
+#include "generic/model_generic.h"
+#include "libxsmm.h"
+#include "m4/model_m4.h"
+#include "zen5/model_zen5.h"
+
 namespace einsum_ir::model::common {
 
   /**
@@ -9,7 +19,7 @@ namespace einsum_ir::model::common {
   enum class Model {
     ZEN5,
     M4,
-    PI5,
+    A76,
     GENERIC
   };
 
@@ -22,6 +32,8 @@ namespace einsum_ir::model::common {
    * @param i_trans_a The transpose flag for matrix A (0 or 1).
    * @param i_trans_b The transpose flag for matrix B (0 or 1).
    * @param i_model The performance model to use.
+   * @param i_peak_gflops Optional peak GFLOPS for generic model (default: 0.0).
+   * @param i_vector_size Optional vector width for generic model (default: 0).
    *
    * @return The estimated execution time in seconds.
    */
@@ -30,7 +42,9 @@ namespace einsum_ir::model::common {
                         int i_k,
                         int i_trans_a,
                         int i_trans_b,
-                        Model i_model);
+                        Model i_model,
+                        double i_peak_gflops = 0.0,
+                        int i_vector_size = 0);
 
   /**
    * Get the measured execution time using libxsmm.

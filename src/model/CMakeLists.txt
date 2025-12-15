@@ -18,12 +18,13 @@ include_directories(
 set(SOURCES
     src/bench_model.cpp
     src/common/common.cpp
+    src/common/interpolation.cpp
     src/m4/bench_m4.cpp
     src/m4/model_m4.cpp
     src/zen5/bench_zen5.cpp
     src/zen5/model_zen5.cpp
-    src/pi5/bench_pi5.cpp
-    src/pi5/model_pi5.cpp
+    src/a76/bench_a76.cpp
+    src/a76/model_a76.cpp
     src/generic/model_generic.cpp
 )
 
