@@ -1,0 +1,136 @@
+#include "model_m4.h"
+
+namespace einsum_ir::model::m4 {
+
+  double lerp(double x0, double x1, double t) {
+    return x0 + t * (x1 - x0);
+  }
+
+  void find_bounds_mn(const int* arr, int size, int val, int& idx_lower, double& t) {
+    // Check if value is above maximum (> 256)
+    if (val > 256) {
+      // Map to 241-256 range based on modulo 16
+      // val % 16 gives 0-15, map to values 241-256 (which are idx 46-47 in the array)
+      int mod16 = val % 16;
+      // Find the value in 241-256 range that has the same mod16
+      // 241 % 16 = 1, 242 % 16 = 2, ..., 255 % 16 = 15, 256 % 16 = 0
+      int mapped_val = (mod16 == 0) ? 256 : (240 + mod16);
+
+      // Now find this mapped value in the array
+      const int* exact = std::lower_bound(arr, arr + size, mapped_val);
+      if (exact != arr + size && *exact == mapped_val) {
+        idx_lower = exact - arr;
+        t = 0.0;
+        return;
+      }
+    }
+
+    // Exact match check
+    const int* exact = std::lower_bound(arr, arr + size, val);
+    if (exact != arr + size && *exact == val) {
+      idx_lower = exact - arr;
+      t = 0.0;
+      return;
+    }
+
+    // Find surrounding values
+    const int* upper = std::upper_bound(arr, arr + size, val);
+
+    // Handle out of range with clamping
+    if (upper == arr) {
+      // Below minimum - clamp to first value
+      idx_lower = 0;
+      t = 0.0;
+      return;
+    }
+    if (upper == arr + size) {
+      // Above maximum (shouldn't reach here due to above check)
+      idx_lower = size - 1;
+      t = 0.0;
+      return;
+    }
+
+    // Interpolate between lower and upper
+    const int* lower = upper - 1;
+    idx_lower = lower - arr;
+
+    double v_lower = *lower;
+    double v_upper = *upper;
+    t = (val - v_lower) / (v_upper - v_lower);
+  }
+
+  void find_bounds_k(const int* arr, int size, int val, int& idx_lower, double& t) {
+    // Exact match check
+    const int* exact = std::lower_bound(arr, arr + size, val);
+    if (exact != arr + size && *exact == val) {
+      idx_lower = exact - arr;
+      t = 0.0;
+      return;
+    }
+
+    // Find surrounding values
+    const int* upper = std::upper_bound(arr, arr + size, val);
+
+    // Handle out of range with clamping
+    if (upper == arr) {
+      // minimum - clamp to first value
+      idx_lower = 0;
+      t = 0.0;
+      return;
+    }
+    if (upper == arr + size) {
+      // maximum - clamp to last value
+      idx_lower = size - 1;
+      t = 0.0;
+      return;
+    }
+
+    // Interpolate between lower and upper
+    const int* lower = upper - 1;
+    idx_lower = lower - arr;
+
+    double v_lower = *lower;
+    double v_upper = *upper;
+    t = (val - v_lower) / (v_upper - v_lower);
+  }
+
+  double get_interpolated_gflops(int i_m, int i_n, int i_k, int i_trans_b) {
+    if (i_trans_b < 0) i_trans_b = 0;
+    if (i_trans_b > 1) i_trans_b = 1;
+
+    int m_idx0, n_idx0, k_idx0;
+    double t_m, t_n, t_k;
+
+    find_bounds_mn(M_VALUES, M_SIZE, i_m, m_idx0, t_m);
+    find_bounds_mn(N_VALUES, N_SIZE, i_n, n_idx0, t_n);
+    find_bounds_k(K_VALUES, K_SIZE, i_k, k_idx0, t_k);
+
+    // For clamped values (t=0 and idx at boundary), keep same index
+    int m_idx1 = (t_m > 0.0 && m_idx0 + 1 < M_SIZE) ? m_idx0 + 1 : m_idx0;
+    int n_idx1 = (t_n > 0.0 && n_idx0 + 1 < N_SIZE) ? n_idx0 + 1 : n_idx0;
+    int k_idx1 = (t_k > 0.0 && k_idx0 + 1 < K_SIZE) ? k_idx0 + 1 : k_idx0;
+
+    double c000 = gflops_table[m_idx0][n_idx0][k_idx0][i_trans_b];
+    double c100 = gflops_table[m_idx1][n_idx0][k_idx0][i_trans_b];
+    double c010 = gflops_table[m_idx0][n_idx1][k_idx0][i_trans_b];
+    double c110 = gflops_table[m_idx1][n_idx1][k_idx0][i_trans_b];
+    double c001 = gflops_table[m_idx0][n_idx0][k_idx1][i_trans_b];
+    double c101 = gflops_table[m_idx1][n_idx0][k_idx1][i_trans_b];
+    double c011 = gflops_table[m_idx0][n_idx1][k_idx1][i_trans_b];
+    double c111 = gflops_table[m_idx1][n_idx1][k_idx1][i_trans_b];
+
+    // Trilinear interpolation
+    double c00 = lerp(c000, c100, t_m);
+    double c01 = lerp(c001, c101, t_m);
+    double c10 = lerp(c010, c110, t_m);
+    double c11 = lerp(c011, c111, t_m);
+
+    double c0 = lerp(c00, c10, t_n);
+    double c1 = lerp(c01, c11, t_n);
+
+    double result = lerp(c0, c1, t_k);
+
+    return result;
+  }
+
+}  // namespace einsum_ir::model::m4
