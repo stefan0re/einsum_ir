@@ -26,9 +26,13 @@ int main(int argc, char** argv) {
     model = einsum_ir::model::common::Model::ZEN5;
   } else if (std::strcmp(argv[6], "m4") == 0) {
     model = einsum_ir::model::common::Model::M4;
+  } else if (std::strcmp(argv[6], "pi5") == 0) {
+    model = einsum_ir::model::common::Model::PI5;
+  } else if (std::strcmp(argv[6], "generic") == 0) {
+    model = einsum_ir::model::common::Model::GENERIC;
   } else {
     std::cerr << "Error: Unknown model '" << argv[6] << "'" << std::endl;
-    std::cerr << "Available models: zen5, m4" << std::endl;
+    std::cerr << "Available models: zen5, m4, pi5, generic" << std::endl;
     return EXIT_FAILURE;
   }
 
