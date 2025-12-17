@@ -106,7 +106,7 @@ namespace einsum_ir::model::common {
 
     double l_warmup_duration = std::chrono::duration<double>(l_end_warmup - l_start_warmup).count();
     double l_time_per_iter = l_warmup_duration / l_reps_warmup;
-    size_t l_reps = (size_t)(1.0 / l_time_per_iter);
+    size_t l_reps = (size_t)(8.0 / l_time_per_iter);
     if (l_reps < 1) l_reps = 1;
 
     auto l_start = std::chrono::high_resolution_clock::now();
