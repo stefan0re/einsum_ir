@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
     std::cout << std::endl;
     std::cout << "Examples:" << std::endl;
     std::cout << "  " << argv[0] << " 64 48 64 0 0 zen5" << std::endl;
-    std::cout << "  " << argv[0] << " 64 48 64 0 0 generic 100.0 8" << std::endl;
+    std::cout << "  " << argv[0] << " 64 48 64 0 0 generic 100.0 16" << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -72,9 +72,14 @@ int main(int argc, char** argv) {
     std::cout << "Vector Size: " << vector_size << std::endl;
   }
 
-  double model_time = einsum_ir::model::common::get_time_model(m, n, k, trans_a, trans_b, model, peak_gflops, vector_size);
-  double xsmm_time = einsum_ir::model::common::get_time_xsmm(m, n, k, trans_a, trans_b);
+  double model_gflops = 0.0;
+  double xsmm_gflops = 0.0;
 
+  double model_time = einsum_ir::model::common::get_time_model(m, n, k, trans_a, trans_b, model, model_gflops, peak_gflops, vector_size);
+  double xsmm_time = einsum_ir::model::common::get_time_xsmm(m, n, k, trans_a, trans_b, xsmm_gflops);
+
+  std::cout << "Model GFLOPS: " << model_gflops << std::endl;
+  std::cout << "XSMM GFLOPS: " << xsmm_gflops << std::endl;
   std::cout << "Model Time: " << model_time << " seconds" << std::endl;
   std::cout << "XSMM Time: " << xsmm_time << " seconds" << std::endl;
   std::cout << "----------------------------------------" << std::endl;

@@ -5,16 +5,10 @@
 namespace einsum_ir::model::m4 {
 
   void find_bounds_mn(const int* arr, int size, int val, int& idx_lower, double& t) {
-    // Check if value is above maximum (> 256)
     if (val > 256) {
-      // Map to 241-256 range based on modulo 16
-      // val % 16 gives 0-15, map to values 241-256 (which are idx 46-47 in the array)
       int mod16 = val % 16;
-      // Find the value in 241-256 range that has the same mod16
-      // 241 % 16 = 1, 242 % 16 = 2, ..., 255 % 16 = 15, 256 % 16 = 0
       int mapped_val = (mod16 == 0) ? 256 : (240 + mod16);
 
-      // Now find this mapped value in the array
       const int* exact = std::lower_bound(arr, arr + size, mapped_val);
       if (exact != arr + size && *exact == mapped_val) {
         idx_lower = exact - arr;
@@ -23,7 +17,6 @@ namespace einsum_ir::model::m4 {
       }
     }
 
-    // Exact match check
     const int* exact = std::lower_bound(arr, arr + size, val);
     if (exact != arr + size && *exact == val) {
       idx_lower = exact - arr;
@@ -31,24 +24,19 @@ namespace einsum_ir::model::m4 {
       return;
     }
 
-    // Find surrounding values
     const int* upper = std::upper_bound(arr, arr + size, val);
 
-    // Handle out of range with clamping
     if (upper == arr) {
-      // Below minimum - clamp to first value
       idx_lower = 0;
       t = 0.0;
       return;
     }
     if (upper == arr + size) {
-      // Above maximum (shouldn't reach here due to above check)
       idx_lower = size - 1;
       t = 0.0;
       return;
     }
 
-    // Interpolate between lower and upper
     const int* lower = upper - 1;
     idx_lower = lower - arr;
 

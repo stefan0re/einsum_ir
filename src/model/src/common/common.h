@@ -34,6 +34,7 @@ namespace einsum_ir::model::common {
    * @param i_model The performance model to use.
    * @param i_peak_gflops Optional peak GFLOPS for generic model (default: 0.0).
    * @param i_vector_size Optional vector width for generic model (default: 0).
+   * @param o_gflops Output parameter to receive the estimated GFLOPS.
    *
    * @return The estimated execution time in seconds.
    */
@@ -43,6 +44,7 @@ namespace einsum_ir::model::common {
                         int i_trans_a,
                         int i_trans_b,
                         Model i_model,
+                        double& o_gflops,
                         double i_peak_gflops = 0.0,
                         int i_vector_size = 0);
 
@@ -61,7 +63,8 @@ namespace einsum_ir::model::common {
                        int i_n,
                        int i_k,
                        int i_trans_a,
-                       int i_trans_b);
+                       int i_trans_b,
+                       double& o_gflops);
 
 }  // namespace einsum_ir::model::common
 

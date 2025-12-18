@@ -3,7 +3,7 @@
 
 namespace einsum_ir::model::generic {
   /**
-   * Get interpolated GFLOPS value based on input dimensions and transpose flags.
+   * Get GFLOPS value based on input dimensions.
    * Using a heuristic model.
    *
    * @param i_m The M dimension size.
@@ -16,13 +16,13 @@ namespace einsum_ir::model::generic {
    *
    * @return The interpolated GFLOPS value.
    */
-  double get_interpolated_gflops(int i_m,
-                                 int i_n,
-                                 int i_k,
-                                 int i_trans_a,
-                                 int i_trans_b,
-                                 double i_peak_gflops,
-                                 int i_vector_size);
+  double get_gflops(int i_m,
+                    int i_n,
+                    int i_k,
+                    int i_trans_a,
+                    int i_trans_b,
+                    double i_peak_gflops,
+                    int i_vector_size);
 }  // namespace einsum_ir::model::generic
 
 #endif  // EINSUM_IR_MODEL_GENERIC_MODEL_GENERIC_H

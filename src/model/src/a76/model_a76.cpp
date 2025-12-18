@@ -69,7 +69,6 @@ namespace einsum_ir::model::a76 {
 
     int l_m_blocking = 16;
 
-    // get M blocking
     if (i_m >= l_m_blocking) {
       l_m_full = l_m_blocking;
       l_m_full_count = i_m / l_m_blocking;
@@ -83,13 +82,10 @@ namespace einsum_ir::model::a76 {
 
     l_n_first = i_n;
 
-    // get N blocking
     while (l_m_registers * l_n_first + l_m_registers + l_n_first > 32) {
       l_n_first--;
     }
 
-    // set first and second N kernel
-    // n chunks count
     unsigned int l_number_of_chunks = ((i_n - 1) / l_n_first) + 1;
     unsigned int l_modulo = i_n % l_number_of_chunks;
     unsigned int l_n2 = i_n / l_number_of_chunks;
@@ -182,15 +178,15 @@ namespace einsum_ir::model::a76 {
     double flops_area_d = 2.0 * (kernels.k2.m) * (kernels.k3.n * kernels.second_n_count) * i_k;
     double gesamt_flops = flops_area_a + flops_area_b + flops_area_c + flops_area_d;
 
-    double gflops_part_a = 0.0;
-    double gflops_part_b = 0.0;
-    double gflops_part_c = 0.0;
-    double gflops_part_d = 0.0;
+    double gflops_part_k1 = 0.0;
+    double gflops_part_k2 = 0.0;
+    double gflops_part_k3 = 0.0;
+    double gflops_part_k4 = 0.0;
 
-    double time_1_area_a = 0.0;
-    double time_1_area_b = 0.0;
-    double time_1_area_c = 0.0;
-    double time_1_area_d = 0.0;
+    double time_1_area_k1 = 0.0;
+    double time_1_area_k2 = 0.0;
+    double time_1_area_k3 = 0.0;
+    double time_1_area_k4 = 0.0;
 
     if (gesamt_flops != (i_m * i_n * i_k * 2.0)) {
       std::cerr << "Flops calculation is wrong!" << std::endl;
@@ -198,32 +194,32 @@ namespace einsum_ir::model::a76 {
     }
 
     if (kernels.k1.m > 0 && kernels.k1.n > 0) {
-      gflops_part_a = get_gflops(kernels.k1.m, kernels.k1.n, i_k, i_transpose_a, i_transpose_b);
+      gflops_part_k1 = get_gflops(kernels.k1.m, kernels.k1.n, i_k, i_transpose_a, i_transpose_b);
     }
     if (kernels.k2.m > 0 && kernels.k2.n > 0) {
-      gflops_part_b = get_gflops(kernels.k2.m, kernels.k2.n, i_k, i_transpose_a, i_transpose_b);
+      gflops_part_k2 = get_gflops(kernels.k2.m, kernels.k2.n, i_k, i_transpose_a, i_transpose_b);
     }
     if (kernels.k3.m > 0 && kernels.k3.n > 0) {
-      gflops_part_c = get_gflops(kernels.k3.m, kernels.k3.n, i_k, i_transpose_a, i_transpose_b);
+      gflops_part_k3 = get_gflops(kernels.k3.m, kernels.k3.n, i_k, i_transpose_a, i_transpose_b);
     }
     if (kernels.k4.m > 0 && kernels.k4.n > 0) {
-      gflops_part_d = get_gflops(kernels.k4.m, kernels.k4.n, i_k, i_transpose_a, i_transpose_b);
+      gflops_part_k4 = get_gflops(kernels.k4.m, kernels.k4.n, i_k, i_transpose_a, i_transpose_b);
     }
 
-    if (gflops_part_a > 0.0) {
-      time_1_area_a = flops_area_a / (gflops_part_a);
+    if (gflops_part_k1 > 0.0) {
+      time_1_area_k1 = flops_area_a / (gflops_part_k1);
     }
-    if (gflops_part_b > 0.0) {
-      time_1_area_b = flops_area_b / (gflops_part_b);
+    if (gflops_part_k2 > 0.0) {
+      time_1_area_k2 = flops_area_b / (gflops_part_k2);
     }
-    if (gflops_part_c > 0.0) {
-      time_1_area_c = flops_area_c / (gflops_part_c);
+    if (gflops_part_k3 > 0.0) {
+      time_1_area_k3 = flops_area_c / (gflops_part_k3);
     }
-    if (gflops_part_d > 0.0) {
-      time_1_area_d = flops_area_d / (gflops_part_d);
+    if (gflops_part_k4 > 0.0) {
+      time_1_area_k4 = flops_area_d / (gflops_part_k4);
     }
 
-    double time_total = time_1_area_a + time_1_area_b + time_1_area_c + time_1_area_d;
+    double time_total = time_1_area_k1 + time_1_area_k2 + time_1_area_k3 + time_1_area_k4;
     time_total /= 1e9;
 
     double total_perf_flops = 1 / time_total;

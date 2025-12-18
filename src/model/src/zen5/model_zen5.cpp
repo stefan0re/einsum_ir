@@ -5,15 +5,10 @@
 namespace einsum_ir::model::zen5 {
 
   void find_bounds_m(const int* arr, int size, int val, int& idx_lower, double& t) {
-    // Check if value is above 128
     if (val > 128) {
-      // Map to 113-128 range based on modulo 16
-      // val % 16 gives 0-15, map to values 113-128
-      // 113 % 16 = 1, 114 % 16 = 2, ..., 127 % 16 = 15, 128 % 16 = 0
       int mod16 = val % 16;
       int mapped_val = (mod16 == 0) ? 128 : (112 + mod16);
 
-      // Now find this mapped value in the array
       const int* exact = std::lower_bound(arr, arr + size, mapped_val);
       if (exact != arr + size && *exact == mapped_val) {
         idx_lower = exact - arr;
@@ -22,7 +17,6 @@ namespace einsum_ir::model::zen5 {
       }
     }
 
-    // Exact match check
     const int* exact = std::lower_bound(arr, arr + size, val);
     if (exact != arr + size && *exact == val) {
       idx_lower = exact - arr;
@@ -30,24 +24,19 @@ namespace einsum_ir::model::zen5 {
       return;
     }
 
-    // Find surrounding values
     const int* upper = std::upper_bound(arr, arr + size, val);
 
-    // Handle out of range with clamping
     if (upper == arr) {
-      // Below minimum - clamp to first value
       idx_lower = 0;
       t = 0.0;
       return;
     }
     if (upper == arr + size) {
-      // Above maximum (shouldn't reach here due to above check)
       idx_lower = size - 1;
       t = 0.0;
       return;
     }
 
-    // Interpolate between lower and upper
     const int* lower = upper - 1;
     idx_lower = lower - arr;
 

@@ -8,6 +8,7 @@ namespace einsum_ir::model::common {
                         int i_trans_a,
                         int i_trans_b,
                         Model i_model,
+                        double& o_gflops,
                         double i_peak_gflops,
                         int i_vector_size) {
     double l_gflops = 1.0;
@@ -22,10 +23,10 @@ namespace einsum_ir::model::common {
         l_gflops = einsum_ir::model::a76::get_interpolated_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b);
         break;
       case Model::GENERIC:
-        l_gflops = einsum_ir::model::generic::get_interpolated_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b, i_peak_gflops, i_vector_size);
+        l_gflops = einsum_ir::model::generic::get_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b, i_peak_gflops, i_vector_size);
         break;
     }
-    std::cout << "Model GFLOPS: " << l_gflops << std::endl;
+    o_gflops = l_gflops;
     double l_time = ((double)(i_m) * (double)(i_n) * (double)(i_k) * 2.0) / (l_gflops * 1.0e9);
     return l_time;
   }
@@ -34,7 +35,8 @@ namespace einsum_ir::model::common {
                        int i_n,
                        int i_k,
                        int i_trans_a,
-                       int i_trans_b) {
+                       int i_trans_b,
+                       double& o_gflops) {
     float* l_a;
     float* l_b;
     float* l_c;
@@ -92,7 +94,6 @@ namespace einsum_ir::model::common {
       l_c_ref[l_en] = 0.0f;
     }
 
-    // warmup run
     size_t l_reps_warmup = 10;
     auto l_start_warmup = std::chrono::high_resolution_clock::now();
     for (size_t i = 0; i < l_reps_warmup; ++i) {
@@ -123,7 +124,7 @@ namespace einsum_ir::model::common {
 
     double l_gflops = (2.0 * i_m * i_n * i_k * l_reps) / (l_duration * 1.0e9);
 
-    std::cout << "XSMM GFLOPS: " << l_gflops << std::endl;
+    o_gflops = l_gflops;
 
     double l_time = l_duration / l_reps;
 

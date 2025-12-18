@@ -4,17 +4,18 @@
 
 namespace einsum_ir::model::generic {
 
-  double get_interpolated_gflops(int i_m,
-                                 int i_n,
-                                 int i_k,
-                                 int i_trans_a,
-                                 int i_trans_b,
-                                 double i_peak_gflops,
-                                 int i_vector_size) {
+  double get_gflops(int i_m,
+                    int i_n,
+                    int i_k,
+                    int i_trans_a,
+                    int i_trans_b,
+                    double i_peak_gflops,
+                    int i_vector_size) {
     double m_factor = 1.0f;
     double n_factor = 1.0f;
     double k_factor = 1.0f;
     double efficiency = 1.0f;
+    double gflops = 0.0f;
     if (i_vector_size > 0) {
       int kernel_m_size = i_vector_size;
       int num_kernels = i_m / kernel_m_size;
@@ -44,6 +45,12 @@ namespace einsum_ir::model::generic {
 
     efficiency = static_cast<double>(m_factor * n_factor * k_factor);
 
-    return i_peak_gflops * efficiency;
+    gflops = i_peak_gflops * efficiency;
+
+    if (i_trans_a != 0) {
+      gflops *= 0.9;
+    }
+
+    return gflops;
   }
 }  // namespace einsum_ir::model::generic
