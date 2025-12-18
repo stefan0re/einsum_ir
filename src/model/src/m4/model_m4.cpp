@@ -5,26 +5,23 @@
 namespace einsum_ir::model::m4 {
 
   void find_bounds_mn(const int* arr, int size, int val, int& idx_lower, double& t) {
+    // For values > 256, map them to the 240-256 range based on mod 16
+    int search_val = val;
     if (val > 256) {
       int mod16 = val % 16;
-      int mapped_val = (mod16 == 0) ? 256 : (240 + mod16);
-
-      const int* exact = std::lower_bound(arr, arr + size, mapped_val);
-      if (exact != arr + size && *exact == mapped_val) {
-        idx_lower = exact - arr;
-        t = 0.0;
-        return;
-      }
+      search_val = (mod16 == 0) ? 256 : (240 + mod16);
     }
 
-    const int* exact = std::lower_bound(arr, arr + size, val);
-    if (exact != arr + size && *exact == val) {
+    // Check for exact match
+    const int* exact = std::lower_bound(arr, arr + size, search_val);
+    if (exact != arr + size && *exact == search_val) {
       idx_lower = exact - arr;
       t = 0.0;
       return;
     }
 
-    const int* upper = std::upper_bound(arr, arr + size, val);
+    // Find bounds for interpolation
+    const int* upper = std::upper_bound(arr, arr + size, search_val);
 
     if (upper == arr) {
       idx_lower = 0;
@@ -42,7 +39,7 @@ namespace einsum_ir::model::m4 {
 
     double v_lower = *lower;
     double v_upper = *upper;
-    t = (val - v_lower) / (v_upper - v_lower);
+    t = (search_val - v_lower) / (v_upper - v_lower);
   }
 
   double get_interpolated_gflops(int i_m,
