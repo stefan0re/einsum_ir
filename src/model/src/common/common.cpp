@@ -1,5 +1,7 @@
 #include "common.h"
 
+#include <stdexcept>
+
 namespace einsum_ir::model::common {
 
   double get_time_model(int i_m,
@@ -11,6 +13,30 @@ namespace einsum_ir::model::common {
                         double& o_gflops,
                         double i_peak_gflops,
                         int i_vector_size) {
+    // Validate matrix dimensions
+    if (i_m <= 0 || i_n <= 0 || i_k <= 0) {
+      std::cerr << "Matrix dimensions must be positive" << std::endl;
+      return 0.0;
+    }
+
+    // Validate transpose flags
+    if (i_trans_a < 0 || i_trans_a > 1 || i_trans_b < 0 || i_trans_b > 1) {
+      std::cerr << "Transpose flags must be 0 or 1" << std::endl;
+      return 0.0;
+    }
+
+    // Validate generic model parameters
+    if (i_model == Model::GENERIC) {
+      if (i_peak_gflops <= 0.0) {
+        std::cerr << "Peak GFLOPS must be positive for generic model" << std::endl;
+        return 0.0;
+      }
+      if (i_vector_size <= 0) {
+        std::cerr << "Vector size must be positive for generic model" << std::endl;
+        return 0.0;
+      }
+    }
+
     double l_gflops = 1.0;
     switch (i_model) {
       case Model::ZEN5:
@@ -37,6 +63,18 @@ namespace einsum_ir::model::common {
                        int i_trans_a,
                        int i_trans_b,
                        double& o_gflops) {
+    // Validate matrix dimensions
+    if (i_m <= 0 || i_n <= 0 || i_k <= 0) {
+      std::cerr << "Matrix dimensions must be positive" << std::endl;
+      return 0.0;
+    }
+
+    // Validate transpose flags
+    if (i_trans_a < 0 || i_trans_a > 1 || i_trans_b < 0 || i_trans_b > 1) {
+      std::cerr << "Transpose flags must be 0 or 1" << std::endl;
+      return 0.0;
+    }
+
     float* l_a;
     float* l_b;
     float* l_c;
