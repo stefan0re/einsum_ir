@@ -4,6 +4,9 @@ project(model)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Set optimization flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+
 find_library(LIBXSMM_LIBRARY
     NAMES xsmm libxsmm
     PATHS ${CMAKE_SOURCE_DIR}/../../libxsmm/lib
@@ -22,6 +25,8 @@ set(LIBRARY_SOURCES
     src/zen5/model_zen5.cpp
     src/a76/model_a76.cpp
     src/generic/model_generic.cpp
+    src/tensor/backend.cpp
+    src/tensor/frontend.cpp
 )
 
 add_library(perf_model STATIC ${LIBRARY_SOURCES})
@@ -36,3 +41,11 @@ set(EXECUTABLE_SOURCES
 
 add_executable(bench_model ${EXECUTABLE_SOURCES})
 target_link_libraries(bench_model perf_model)
+
+add_executable(bench_tensor 
+    src/bench_tensor.cpp
+    src/m4/bench_m4.cpp
+    src/zen5/bench_zen5.cpp
+    src/a76/bench_a76.cpp
+)
+target_link_libraries(bench_tensor perf_model)
