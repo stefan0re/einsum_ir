@@ -10,8 +10,8 @@ top_config = etops.TensorOperationConfig(
     exec_types =   (etops.exec.seq,  etops.exec.seq,  etops.exec.seq,  etops.exec.prim, etops.exec.prim, etops.exec.prim),
     dim_sizes  =   (32,              8,               16,              32,              32,              32             ),
     strides    = (((32,              0,               1024 * 32,       1,               0,               1024           ),   # in0
-                   (0,              32 * 512,         32,              0,               512,             1              ),   # in1
-                   (32,             1024 * 32,        0,               1,               1024,            0              )),) # out
+                   (0,               32 * 512,        32,              0,               512,             1              ),   # in1
+                   (32,              1024 * 32,       0,               1,               1024,            0              )),) # out
 )
 
 # Create the TensorOperation instance
