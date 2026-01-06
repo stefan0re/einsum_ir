@@ -166,6 +166,9 @@ namespace einsum_ir::model::tensor::frontend {
     bool get_trans_a() const { return m_trans_a; }
     bool get_trans_b() const { return m_trans_b; }
     int64_t get_loop_iterations() const { return m_loop_iterations; }
+    common::Model get_model() const { return m_model; }
+    double get_peak_gflops() const { return m_peak_gflops; }
+    int get_vector_size() const { return m_vector_size; }
   };
 
 }  // namespace einsum_ir::model::tensor::frontend
