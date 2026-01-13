@@ -33,18 +33,20 @@ namespace einsum_ir::model::tensor::frontend {
   };
 
   enum class DimensionType : uint8_t {
-    k,
-    m,
-    n,
-    c,
+    k,  // contraction dimension
+    m,  // left-output dimension
+    n,  // right-output dimension
+    c,  // batch/common dimension
+    i,  // left-only dimension
+    j,  // right-only dimension
     undefined
   };
 
   enum class ExecutionType : uint8_t {
-    seq,
-    shared,
-    sfc,
-    prim,
+    seq,   // sequential execution
+    omp,   // OpenMP parallel execution
+    sfc,   // space-filling curve execution
+    prim,  // primitive dimension
     undefined
   };
 

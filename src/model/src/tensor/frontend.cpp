@@ -13,13 +13,7 @@ namespace einsum_ir::model::tensor::frontend {
         m_prim_m_size(0),
         m_prim_n_size(0),
         m_prim_k_size(0),
-        m_prim_br_size(0),
-        m_model(common::Model::GENERIC),
-        m_peak_gflops(0.0),
-        m_vector_size(0),
-        m_trans_a(false),
-        m_trans_b(false),
-        m_loop_iterations(1) {
+        m_prim_br_size(0) {
   }
 
   void TensorOperationConfig::setup(
