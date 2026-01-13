@@ -778,3 +778,34 @@ einsum_ir::py::TensorOperation::error_t einsum_ir::py::TensorOperation::optimize
   
   return error_t::success;
 }
+
+double einsum_ir::py::TensorOperation::model_gemm(model_t model, double peak_gflops, int vector_size){
+  double l_time = 0.0;
+  double o_gflops = 0.0;
+
+  if (m_op_type == op_type_t::binary) {
+    // Convert model_t to einsum_ir::model::common::Model
+    einsum_ir::model::common::Model l_model;
+    switch (model) {
+      case model_t::zen5:    l_model = einsum_ir::model::common::Model::ZEN5;    break;
+      case model_t::m4:      l_model = einsum_ir::model::common::Model::M4;      break;
+      case model_t::a76:     l_model = einsum_ir::model::common::Model::A76;     break;
+      case model_t::generic: l_model = einsum_ir::model::common::Model::GENERIC; break;
+      default:               l_model = einsum_ir::model::common::Model::GENERIC; break;
+    }
+
+    l_time = einsum_ir::model::common::get_time_model(
+      m_backend_binary.get_prim_m(),
+      m_backend_binary.get_prim_n(),
+      m_backend_binary.get_prim_k(),
+      m_backend_binary.get_transpose_a(),
+      m_backend_binary.get_transpose_b(),
+      l_model,
+      o_gflops,
+      peak_gflops,
+      vector_size
+    );
+  }
+
+  return l_time;
+}

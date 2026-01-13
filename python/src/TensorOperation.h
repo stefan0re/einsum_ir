@@ -7,6 +7,7 @@
 #include <einsum_ir/basic/unary/UnaryOptimizer.h>
 #include <einsum_ir/basic/binary/ContractionBackendTpp.h>
 #include <einsum_ir/basic/binary/ContractionOptimizer.h>
+#include <einsum_ir/model/src/common/common.h>
 
 namespace einsum_ir {
   namespace py {
@@ -81,6 +82,14 @@ class einsum_ir::py::TensorOperation {
       invalid_optimization_config = 3
     };
 
+    /// performance model type
+    enum class model_t : uint32_t {
+      zen5    = 0,
+      m4      = 1,
+      a76     = 2,
+      generic = 3
+    };
+
     op_type_t m_op_type = op_type_t::undefined;
     einsum_ir::basic::UnaryBackendTpp m_backend_unary;
     einsum_ir::basic::ContractionBackendTpp m_backend_binary;
@@ -123,6 +132,15 @@ class einsum_ir::py::TensorOperation {
                   void const * tensor_in1,
                   void       * tensor_out );
 
+    /**
+     * Execute performance model for the GEMM primitive operation.
+     * 
+     * @param model The performance model to use (zen5, m4, a76, generic).
+     * @param peak_gflops Optional peak GFLOPS for generic model (default: 0.0).
+     * @param vector_size Optional vector width for generic model (default: 0).
+     * @return The estimated execution time in seconds.
+     */
+    double model_gemm(model_t model, double peak_gflops = 0.0, int vector_size = 0);
     /**
      * Optimizes a tensor operation configuration.
      *

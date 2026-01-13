@@ -13,7 +13,8 @@ from ._etops_core import (
     PrimType        as _PrimType,
     ExecType        as _ExecType,
     DimType         as _DimType,
-    ErrorType       as _ErrorType
+    ErrorType       as _ErrorType,
+    ModelType       as _ModelType
 )
 
 # Make _ErrorType the *single* public alias
@@ -24,6 +25,7 @@ DataType = _DataType
 PrimType = _PrimType
 ExecType = _ExecType
 DimType  = _DimType
+ModelType = _ModelType
 
 #: Alias for DataType
 dtype = DataType
@@ -103,6 +105,28 @@ class dim:
         "m",
         "n",
         "k"
+    ]
+
+    @classmethod
+    def __dir__(cls):
+        return cls.__all__
+
+class model:
+    """Namespace for performance model types."""
+    #: Alias for ModelType.zen5
+    zen5 = ModelType.zen5
+    #: Alias for ModelType.m4
+    m4 = ModelType.m4
+    #: Alias for ModelType.a76
+    a76 = ModelType.a76
+    #: Alias for ModelType.generic
+    generic = ModelType.generic
+
+    __all__ = [
+        "zen5",
+        "m4",
+        "a76",
+        "generic"
     ]
 
     @classmethod
@@ -400,6 +424,7 @@ __all__ = [
     "PrimType",
     "ExecType",
     "DimType",
+    "ModelType",
     "dtype",
     "float32",
     "float64",
@@ -407,6 +432,7 @@ __all__ = [
     "etype",
     "exec",
     "dim",
+    "model",
     "backend",
     "optimize",
     "ErrorType"

@@ -43,6 +43,13 @@ PYBIND11_MODULE(_etops_core, m) {
     .value("k", TensorOperation::dim_t::k)
     .export_values();
 
+  py::enum_<TensorOperation::model_t>(m, "ModelType")
+    .value("zen5", TensorOperation::model_t::zen5)
+    .value("m4", TensorOperation::model_t::m4)
+    .value("a76", TensorOperation::model_t::a76)
+    .value("generic", TensorOperation::model_t::generic)
+    .export_values();
+
   py::class_<TensorOperation>(m, "TensorOperation")
     .def(py::init<>())
     .def(
@@ -330,5 +337,23 @@ PYBIND11_MODULE(_etops_core, m) {
         :return: Dictionary containing default optimization parameters for the backend.
       )doc",
       py::arg("backend")
+    )
+    .def(
+      "model_gemm",
+      &TensorOperation::model_gemm,
+      R"doc(
+        Execute performance model for the GEMM primitive operation.
+
+        Estimates execution time using a performance model for the configured GEMM operation.
+        Only works for binary (GEMM) operations.
+
+        :param model: The performance model to use (zen5, m4, a76, or generic).
+        :param peak_gflops: Optional peak GFLOPS for generic model (default: 0.0).
+        :param vector_size: Optional vector width for generic model (default: 0).
+        :return: Estimated execution time in seconds.
+      )doc",
+      py::arg("model") = TensorOperation::model_t::generic,
+      py::arg("peak_gflops") = 0.0,
+      py::arg("vector_size") = 0
     );
 }

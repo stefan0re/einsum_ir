@@ -29,11 +29,27 @@ add_subdirectory(
 )
 
 # ------------------------------------------------------------
+# perf_model
+# ------------------------------------------------------------
+message(STATUS "Building perf_model from ../src/model")
+add_subdirectory(
+    "${CMAKE_CURRENT_LIST_DIR}/../src/model"
+    model_local
+    EXCLUDE_FROM_ALL
+)
+
+# ------------------------------------------------------------
 # Copy headers so that <einsum_ir/basic/...> resolves in-tree
 # ------------------------------------------------------------
 file(
     COPY
     "${CMAKE_CURRENT_LIST_DIR}/../src/basic"
+    DESTINATION "${CMAKE_BINARY_DIR}/include/einsum_ir"
+)
+
+file(
+    COPY
+    "${CMAKE_CURRENT_LIST_DIR}/../src/model"
     DESTINATION "${CMAKE_BINARY_DIR}/include/einsum_ir"
 )
 
@@ -44,11 +60,12 @@ set(PYBIND11_FINDPYTHON ON)
 find_package(pybind11 CONFIG REQUIRED)
 
 add_library(TensorOperation STATIC src/TensorOperation.cpp)
-target_link_libraries(TensorOperation PUBLIC einsum_ir)
+target_link_libraries(TensorOperation PUBLIC einsum_ir perf_model)
 target_include_directories(
     TensorOperation
     PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>"
+    "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include/einsum_ir/model/src>"
 )
 
 if(ETOPS_USE_OPENMP)
