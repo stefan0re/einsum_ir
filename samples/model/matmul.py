@@ -38,25 +38,27 @@ print(f"  Max relative error: {error_rel:.6e}")
 # benchmarking 
 import time
 
-num_iters = 100000
+num_iters = 10000
 
+print("running benchmark...")
 start_time = time.time()
 for _ in range(num_iters):
     top.execute(A, B, C)
 end_time = time.time()
+print("benchmark completed.")
 
 total_time = end_time - start_time
 
 avg_time_per_iter = total_time / num_iters
-
-print(f"Execution time: {avg_time_per_iter:.6f} s")
-
+estimated_time = top.model(etops.ModelType.m4)
 
 gflops = (2.0 * 512 * 512 * 512) / (avg_time_per_iter * 1e9)
-print(f"Achieved GFLOPS: {gflops:.2f} GFLOPS")
-
-estimated_time = top.model_gemm(etops.ModelType.m4)
-print(f"Estimated time by model: {estimated_time:.20f} s")
-
 es_gflops = (2.0 * 512 * 512 * 512) / (estimated_time * 1e9)
-print(f"Estimated GFLOPS by model: {es_gflops:.2f} GFLOPS")
+
+print(f"Total time for {num_iters} iterations: {total_time:.8f} s")
+print("****************************")
+print(f"Execution time: {avg_time_per_iter:.8f} s")
+print(f"Estimated: {estimated_time:.8f} s")
+print("****************************")
+print(f"Achieved GFLOPS: {gflops:.2f} GFLOPS")
+print(f"Estimated GFLOPS: {es_gflops:.2f} GFLOPS")

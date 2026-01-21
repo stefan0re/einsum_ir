@@ -56,6 +56,7 @@ namespace einsum_ir::model::common {
    * @param i_k The K dimension size.
    * @param i_trans_a The transpose flag for matrix A (0 or 1).
    * @param i_trans_b The transpose flag for matrix B (0 or 1).
+   * @param o_gflops Output parameter to receive the measured GFLOPS.
    *
    * @return The measured execution time in seconds.
    */

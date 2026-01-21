@@ -339,8 +339,8 @@ PYBIND11_MODULE(_etops_core, m) {
       py::arg("backend")
     )
     .def(
-      "model_gemm",
-      &TensorOperation::model_gemm,
+      "model",
+      &TensorOperation::model,
       R"doc(
         Execute performance model for the GEMM primitive operation.
 

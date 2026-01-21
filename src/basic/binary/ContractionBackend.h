@@ -471,6 +471,17 @@ class einsum_ir::basic::ContractionBackend {
     bool get_transpose_b() const {
       return m_trans_b;
     }
+
+    uint64_t gemm_iter(){
+      uint64_t iters = 1;
+
+      for( size_t i = 0; i < m_exec_type.size(); ++i ){
+        if( m_exec_type[i] != exec_t::PRIM ){
+          iters *= m_dim_sizes[i];
+        }
+      }
+      return iters;
+    }
 };
 
 #endif

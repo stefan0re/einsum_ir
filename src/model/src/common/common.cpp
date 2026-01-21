@@ -13,19 +13,16 @@ namespace einsum_ir::model::common {
                         double& o_gflops,
                         double i_peak_gflops,
                         int i_vector_size) {
-    // Validate matrix dimensions
     if (i_m <= 0 || i_n <= 0 || i_k <= 0) {
       std::cerr << "Matrix dimensions must be positive" << std::endl;
       return 0.0;
     }
 
-    // Validate transpose flags
     if (i_trans_a < 0 || i_trans_a > 1 || i_trans_b < 0 || i_trans_b > 1) {
       std::cerr << "Transpose flags must be 0 or 1" << std::endl;
       return 0.0;
     }
 
-    // Validate generic model parameters
     if (i_model == Model::GENERIC) {
       if (i_peak_gflops <= 0.0) {
         std::cerr << "Peak GFLOPS must be positive for generic model" << std::endl;
@@ -37,24 +34,24 @@ namespace einsum_ir::model::common {
       }
     }
 
-    double l_gflops = 1.0;
+    double gflops = 1.0;
     switch (i_model) {
       case Model::ZEN5:
-        l_gflops = einsum_ir::model::zen5::get_interpolated_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b);
+        gflops = einsum_ir::model::zen5::get_interpolated_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b);
         break;
       case Model::M4:
-        l_gflops = einsum_ir::model::m4::get_interpolated_gflops(i_m, i_n, i_k, i_trans_b);
+        gflops = einsum_ir::model::m4::get_interpolated_gflops(i_m, i_n, i_k, i_trans_b);
         break;
       case Model::A76:
-        l_gflops = einsum_ir::model::a76::get_interpolated_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b);
+        gflops = einsum_ir::model::a76::get_interpolated_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b);
         break;
       case Model::GENERIC:
-        l_gflops = einsum_ir::model::generic::get_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b, i_peak_gflops, i_vector_size);
+        gflops = einsum_ir::model::generic::get_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b, i_peak_gflops, i_vector_size);
         break;
     }
-    o_gflops = l_gflops;
-    double l_time = ((double)(i_m) * (double)(i_n) * (double)(i_k) * 2.0) / (l_gflops * 1.0e9);
-    return l_time;
+    o_gflops = gflops;
+    double time = ((double)(i_m) * (double)(i_n) * (double)(i_k) * 2.0) / (gflops * 1.0e9);
+    return time;
   }
 
   double get_time_xsmm(int i_m,
@@ -63,13 +60,12 @@ namespace einsum_ir::model::common {
                        int i_trans_a,
                        int i_trans_b,
                        double& o_gflops) {
-    // Validate matrix dimensions
+
     if (i_m <= 0 || i_n <= 0 || i_k <= 0) {
       std::cerr << "Matrix dimensions must be positive" << std::endl;
       return 0.0;
     }
 
-    // Validate transpose flags
     if (i_trans_a < 0 || i_trans_a > 1 || i_trans_b < 0 || i_trans_b > 1) {
       std::cerr << "Transpose flags must be 0 or 1" << std::endl;
       return 0.0;
@@ -144,8 +140,8 @@ namespace einsum_ir::model::common {
     auto l_end_warmup = std::chrono::high_resolution_clock::now();
 
     double l_warmup_duration = std::chrono::duration<double>(l_end_warmup - l_start_warmup).count();
-    double l_time_per_iter = l_warmup_duration / l_reps_warmup;
-    size_t l_reps = (size_t)(8.0 / l_time_per_iter);
+    double time_per_iter = l_warmup_duration / l_reps_warmup;
+    size_t l_reps = (size_t)(8.0 / time_per_iter);
     if (l_reps < 1) l_reps = 1;
 
     auto l_start = std::chrono::high_resolution_clock::now();
@@ -160,18 +156,18 @@ namespace einsum_ir::model::common {
 
     double l_duration = std::chrono::duration<double>(l_end - l_start).count();
 
-    double l_gflops = (2.0 * i_m * i_n * i_k * l_reps) / (l_duration * 1.0e9);
+    double gflops = (2.0 * i_m * i_n * i_k * l_reps) / (l_duration * 1.0e9);
 
-    o_gflops = l_gflops;
+    o_gflops = gflops;
 
-    double l_time = l_duration / l_reps;
+    double time = l_duration / l_reps;
 
     free(l_a);
     free(l_b);
     free(l_c);
     free(l_c_ref);
 
-    return l_time;
+    return time;
   }
 
 }  // namespace einsum_ir::model::common

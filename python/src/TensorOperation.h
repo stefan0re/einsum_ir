@@ -140,7 +140,7 @@ class einsum_ir::py::TensorOperation {
      * @param vector_size Optional vector width for generic model (default: 0).
      * @return The estimated execution time in seconds.
      */
-    double model_gemm(model_t model, double peak_gflops = 0.0, int vector_size = 0);
+    double model(model_t model, double peak_gflops = 0.0, int vector_size = 0);
     /**
      * Optimizes a tensor operation configuration.
      *

@@ -779,7 +779,7 @@ einsum_ir::py::TensorOperation::error_t einsum_ir::py::TensorOperation::optimize
   return error_t::success;
 }
 
-double einsum_ir::py::TensorOperation::model_gemm(model_t model, double peak_gflops, int vector_size){
+double einsum_ir::py::TensorOperation::model(model_t model, double peak_gflops, int vector_size){
   double l_time = 0.0;
   double o_gflops = 0.0;
 
@@ -805,6 +805,11 @@ double einsum_ir::py::TensorOperation::model_gemm(model_t model, double peak_gfl
       peak_gflops,
       vector_size
     );
+  }
+
+  uint64_t iters = m_backend_binary.gemm_iter();
+  if (iters > 0) {
+    l_time *= static_cast<double>(iters);
   }
 
   return l_time;
