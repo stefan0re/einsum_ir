@@ -42,3 +42,25 @@ set(EXECUTABLE_SOURCES
 
 add_executable(bench_model ${EXECUTABLE_SOURCES})
 target_link_libraries(bench_model perf_model)
+
+# Testing setup
+enable_testing()
+
+# Include Catch2 header location
+include_directories(${CMAKE_SOURCE_DIR}/../../)
+
+# Test sources
+set(TEST_SOURCES
+    src/tests.cpp
+    src/common/common.test.cpp
+    src/zen5/model_zen5.test.cpp
+    src/m4/model_m4.test.cpp
+    src/a76/model_a76.test.cpp
+)
+
+# Create test executable
+add_executable(model_tests ${TEST_SOURCES})
+target_link_libraries(model_tests perf_model)
+
+# Add test to CTest
+add_test(NAME model_tests COMMAND model_tests)
