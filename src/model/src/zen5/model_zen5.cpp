@@ -12,7 +12,6 @@ namespace einsum_ir::model::zen5 {
       search_val = (mod16 == 0) ? 128 : (112 + mod16);
     }
 
-    // Check for exact match
     const int* exact = std::lower_bound(arr, arr + size, search_val);
     if (exact != arr + size && *exact == search_val) {
       idx_lower = exact - arr;
@@ -20,7 +19,6 @@ namespace einsum_ir::model::zen5 {
       return;
     }
 
-    // Find bounds for interpolation
     const int* upper = std::upper_bound(arr, arr + size, search_val);
 
     if (upper == arr) {

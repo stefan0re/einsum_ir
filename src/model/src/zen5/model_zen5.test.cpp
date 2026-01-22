@@ -1,6 +1,15 @@
 #include "catch.hpp"
 #include "model_zen5.h"
 
+TEST_CASE( "Test full size of gflops_table (zen5)" , "[zen5]" ) {
+    using namespace einsum_ir::model::zen5;
+
+    double gflops;
+
+    gflops = gflops_table[M_SIZE-1][N_SIZE-1][K_SIZE-1][1][1];
+    REQUIRE(gflops > 0.0);
+}
+
 TEST_CASE( "Find bounds for M ", "[zen5]" ) {
     using namespace einsum_ir::model::zen5;
 
@@ -29,13 +38,4 @@ TEST_CASE( "Find bounds for M ", "[zen5]" ) {
     find_bounds_m(M_VALUES, M_SIZE, 145, idx_lower, t);
     REQUIRE(idx_lower == M_SIZE - 3);
     REQUIRE(t == Approx(0.0));
-}
-
-TEST_CASE( "Test full size of gflops_table (zen5)" , "[zen5]" ) {
-    using namespace einsum_ir::model::zen5;
-
-    double gflops;
-
-    gflops = gflops_table[M_SIZE-1][N_SIZE-1][K_SIZE-1][1][1];
-    REQUIRE(gflops > 0.0);
 }
