@@ -457,6 +457,15 @@ class einsum_ir::basic::ContractionBackend {
     }
 
     /**
+     * Getter for primitive br size
+     * 
+     * @return br size
+     */
+    uint64_t get_prim_br() const {
+      return m_br;
+    }
+
+    /**
      * Getter for transpose A flag
      * @return transpose A flag
      */

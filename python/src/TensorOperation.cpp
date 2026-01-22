@@ -794,10 +794,16 @@ double einsum_ir::py::TensorOperation::model(model_t model, double peak_gflops, 
       default:               l_model = einsum_ir::model::common::Model::GENERIC; break;
     }
 
+    uint64_t l_k = m_backend_binary.get_prim_k();
+
+    if( m_backend_binary.get_prim_br()) {
+      l_k *= m_backend_binary.get_prim_br();
+    }
+
     l_time = einsum_ir::model::common::get_time_model(
       m_backend_binary.get_prim_m(),
       m_backend_binary.get_prim_n(),
-      m_backend_binary.get_prim_k(),
+      l_k,
       m_backend_binary.get_transpose_a(),
       m_backend_binary.get_transpose_b(),
       l_model,
