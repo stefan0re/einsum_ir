@@ -14,7 +14,6 @@ find_library(LIBXSMM_LIBRARY
 )
 
 include_directories(
-    ${CMAKE_SOURCE_DIR}/../../libxsmm/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
@@ -31,17 +30,21 @@ set(LIBRARY_SOURCES
 )
 
 add_library(perf_model STATIC ${LIBRARY_SOURCES})
-target_link_libraries(perf_model ${LIBXSMM_LIBRARY})
 
-set(EXECUTABLE_SOURCES
-    src/bench_model.cpp
-    src/m4/bench_m4.cpp
-    src/zen5/bench_zen5.cpp
-    src/a76/bench_a76.cpp
-)
 
-add_executable(bench_model ${EXECUTABLE_SOURCES})
-target_link_libraries(bench_model perf_model)
+if(LIBXSMM_LIBRARY)
+    include_directories(${CMAKE_SOURCE_DIR}/../../libxsmm/include)
+    
+    set(EXECUTABLE_SOURCES
+        src/bench_model.cpp
+        src/m4/bench_m4.cpp
+        src/zen5/bench_zen5.cpp
+        src/a76/bench_a76.cpp
+    )
+
+    add_executable(bench_model ${EXECUTABLE_SOURCES})
+    target_link_libraries(bench_model perf_model ${LIBXSMM_LIBRARY})
+endif()
 
 # Testing setup
 enable_testing()

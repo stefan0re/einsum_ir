@@ -47,24 +47,6 @@ TEST_CASE( "Get time Model function bad input." "[common]") {
     REQUIRE( gflops == 0.0 );
 }
 
-TEST_CASE( "Get time XSMM function.", "[common]" ) {
-  using namespace einsum_ir::model::common;
-
-  double gflops = 0.0;
-  double time = get_time_xsmm(128, 128, 128, 0, 0, gflops);
-  REQUIRE( time > 0.0 );
-  REQUIRE( gflops > 0.0 );
-}
-
-TEST_CASE( "Get time XSMM function bad input." "[common]") {
-    using namespace einsum_ir::model::common;
-
-    double gflops = 0.0;
-    double time = get_time_xsmm(-128, 128, 128, 0, 0, gflops);
-    REQUIRE( time == 0.0 ); 
-    REQUIRE( gflops == 0.0 );
-}
-
 TEST_CASE( "Linear interpolation between two values.", "[common]" ) {
   using namespace einsum_ir::model::common;
 
