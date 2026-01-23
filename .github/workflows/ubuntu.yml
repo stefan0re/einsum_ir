@@ -61,7 +61,7 @@ jobs:
           LSAN_OPTIONS: "exitcode=1"
         run: |
           ./build/tests
-          ./src/model/build/tests/model_tests
+          ./src/model/build/model_tests
 
   bcont_lib_manual:
     runs-on: ubuntu-latest

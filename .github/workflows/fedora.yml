@@ -102,6 +102,7 @@ jobs:
         run: |
           ./build_gcc/tests
           ./build_llvm/tests
+          ./src/model/build/model_tests
 
       - name: Run unary tests
         run: |
