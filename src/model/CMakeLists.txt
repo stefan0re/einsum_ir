@@ -27,6 +27,8 @@ set(LIBRARY_SOURCES
     src/a76/model_a76.cpp
     src/a76/bench_a76.cpp
     src/generic/model_generic.cpp
+    src/tensor/tensor_config.cpp
+    src/tensor/tensor_model.cpp
 )
 
 add_library(perf_model STATIC ${LIBRARY_SOURCES})
@@ -45,6 +47,10 @@ if(LIBXSMM_LIBRARY)
     add_executable(bench_model ${EXECUTABLE_SOURCES})
     target_link_libraries(bench_model perf_model ${LIBXSMM_LIBRARY})
 endif()
+
+# Tensor benchmark (no LIBXSMM dependency)
+add_executable(bench_tensor src/bench_tensor.cpp)
+target_link_libraries(bench_tensor perf_model)
 
 # Testing setup
 enable_testing()
