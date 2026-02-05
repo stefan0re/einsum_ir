@@ -52,6 +52,8 @@ namespace einsum_ir::model::tensor {
   // Helper Functions - Implement as needed for your model
   //============================================================================
 
+  void estimate_reuse(const TensorOperationConfig& config);
+
   /**
    * Compute total FLOPs for the tensor contraction.
    * For GEMM: 2 * M * N * K (multiply-add).
@@ -101,10 +103,7 @@ namespace einsum_ir::model::tensor {
    * @param o_reuse_in1 Output: reuse factor for input 1.
    * @param o_reuse_out Output: reuse factor for output.
    */
-  void analyze_data_reuse(const TensorOperationConfig& config,
-                          double& o_reuse_in0,
-                          double& o_reuse_in1,
-                          double& o_reuse_out);
+  void analyze_data_reuse(const TensorOperationConfig& config);
 
   /**
    * Get the GEMM kernel efficiency based on M, N, K dimensions.

@@ -1,16 +1,15 @@
 #include <cstring>
 #include <iostream>
 
-#include "libxsmm.h"
 #include "common/common.h"
+#include "libxsmm.h"
 
 double get_time_xsmm(int i_m,
-                      int i_n,
-                      int i_k,
-                      int i_trans_a,
-                      int i_trans_b,
-                      double& o_gflops) {
-
+                     int i_n,
+                     int i_k,
+                     int i_trans_a,
+                     int i_trans_b,
+                     double& o_gflops) {
   if (i_m <= 0 || i_n <= 0 || i_k <= 0) {
     std::cerr << "Matrix dimensions must be positive" << std::endl;
     return 0.0;
@@ -39,15 +38,15 @@ double get_time_xsmm(int i_m,
   libxsmm_bitfield l_prefetch_flags_brgemm = 0;
 
   l_shape_gemm = libxsmm_create_gemm_shape(i_m,
-                                            i_n,
-                                            i_k,
-                                            (i_trans_a == 0) ? i_m : i_k,
-                                            (i_trans_b == 0) ? i_k : i_n,
-                                            i_m,
-                                            libxsmm_datatype::LIBXSMM_DATATYPE_F32,
-                                            libxsmm_datatype::LIBXSMM_DATATYPE_F32,
-                                            libxsmm_datatype::LIBXSMM_DATATYPE_F32,
-                                            libxsmm_datatype::LIBXSMM_DATATYPE_F32);
+                                           i_n,
+                                           i_k,
+                                           (i_trans_a == 0) ? i_m : i_k,
+                                           (i_trans_b == 0) ? i_k : i_n,
+                                           i_m,
+                                           libxsmm_datatype::LIBXSMM_DATATYPE_F32,
+                                           libxsmm_datatype::LIBXSMM_DATATYPE_F32,
+                                           libxsmm_datatype::LIBXSMM_DATATYPE_F32,
+                                           libxsmm_datatype::LIBXSMM_DATATYPE_F32);
 
   libxsmm_gemm_batch_reduce_config l_config;
   l_config.br_type = LIBXSMM_GEMM_BATCH_REDUCE_NONE;
@@ -57,9 +56,9 @@ double get_time_xsmm(int i_m,
 
   libxsmm_xmmfunction l_xmm_gemm_beta_1;
   l_xmm_gemm_beta_1.gemm = libxsmm_dispatch_brgemm(l_shape_gemm,
-                                                    l_flags_brgemm,
-                                                    l_prefetch_flags_brgemm,
-                                                    l_config);
+                                                   l_flags_brgemm,
+                                                   l_prefetch_flags_brgemm,
+                                                   l_config);
 
   std::random_device l_rd;
   std::mt19937 l_gen(l_rd());

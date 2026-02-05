@@ -40,10 +40,10 @@ namespace einsum_ir::model::tensor {
       .l1_size = 128 * 1024,
       .l2_size = 16 * 1024 * 1024,
       .l3_size = 0,
-      .l1_bandwidth = 400.0,
-      .l2_bandwidth = 200.0,
+      .l1_bandwidth = 912.0,
+      .l2_bandwidth = 912.0,
       .l3_bandwidth = 0.0,
-      .mem_bandwidth = 100.0};
+      .mem_bandwidth = 66.0};
 
   /**
    * ARM Cortex-A76 constants.

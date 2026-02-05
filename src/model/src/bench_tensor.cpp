@@ -70,15 +70,16 @@ void run_tccg_example(Model arch) {
 
   TensorOperationConfig config;
   config.primitive = prim_t::GEMM;
+  config.dtype_in = data_t::FP32;
+  config.dtype_out = data_t::FP32;
+  config.dtype_comp = data_t::FP32;
   config.arch = arch;
 
   config.dim_types = {
-    dim_t::M, dim_t::M, dim_t::M, dim_t::M, dim_t::N, dim_t::K
-  };
+      dim_t::M, dim_t::M, dim_t::M, dim_t::M, dim_t::N, dim_t::K};
 
   config.exec_types = {
-    exec_t::SEQ, exec_t::SEQ, exec_t::SEQ, exec_t::PRIM, exec_t::PRIM, exec_t::PRIM
-  };
+      exec_t::SEQ, exec_t::SEQ, exec_t::SEQ, exec_t::PRIM, exec_t::PRIM, exec_t::PRIM};
 
   config.dim_sizes = {48, 36, 36, 48, 24, 36};
 
@@ -87,6 +88,53 @@ void run_tccg_example(Model arch) {
   config.strides.out = {1492992, 41472, 48, 1, 1728, 0};
 
   // Validate configuration
+  ValidationResult validation = validate_config(config);
+  if (!validation.valid) {
+    std::cerr << "Invalid configuration: " << validation.message << std::endl;
+    return;
+  }
+
+  // Print configuration
+  print_config(std::cout, config);
+
+  // Run performance model
+  ModelResult result = estimate_performance(config);
+
+  std::cout << "\n--- Model Results ---" << std::endl;
+  std::cout << "Total FLOPs:    " << result.flops << std::endl;
+  std::cout << "Memory bytes:   " << result.memory_bytes << std::endl;
+  std::cout << "Time (seconds): " << result.time_seconds << std::endl;
+  std::cout << "GFLOPS:         " << result.gflops << std::endl;
+  std::cout << "Efficiency:     " << result.efficiency * 100.0 << "%" << std::endl;
+  std::cout << std::endl;
+}
+
+void synthetic_example(Model arch) {
+  // Equivalent to Python:
+  // dim_types  = (M, N, M, M, N, K)
+  // exec_types = (SEQ, SEQ, SEQ, PRIM, PRIM, PRIM)
+  // dim_sizes  = (48, 36, 36, 48, 24, 36)
+  // strides    = (((62208, 0, 1728, 1, 0, 48),
+  //                (0, 864, 0, 0, 36, 1),
+  //                (1492992, 41472, 48, 1, 1728, 0)),)
+
+  TensorOperationConfig config;
+  config.primitive = prim_t::GEMM;
+  config.dtype_in = data_t::FP32;
+  config.dtype_out = data_t::FP32;
+  config.dtype_comp = data_t::FP32;
+  config.arch = arch;
+
+  config.dim_types = {dim_t::M, dim_t::N, dim_t::M, dim_t::M, dim_t::N, dim_t::K};
+
+  config.exec_types = {exec_t::SEQ, exec_t::SEQ, exec_t::SEQ, exec_t::PRIM, exec_t::PRIM, exec_t::PRIM};
+
+  config.dim_sizes = {48, 36, 36, 48, 24, 36};
+
+  config.strides.in0 = {62208, 0, 1728, 1, 0, 48};
+  config.strides.in1 = {0, 864, 0, 0, 36, 1};
+  config.strides.out = {1492992, 41472, 48, 1, 1728, 0};
+
   ValidationResult validation = validate_config(config);
   if (!validation.valid) {
     std::cerr << "Invalid configuration: " << validation.message << std::endl;
@@ -153,6 +201,16 @@ int main(int argc, char** argv) {
 
     Model arch = parse_arch(argv[2]);
     run_tccg_example(arch);
+  }
+  if (std::strcmp(command, "synthetic") == 0) {
+    if (argc != 3) {
+      std::cerr << "Error: 'synthetic' command requires 1 argument" << std::endl;
+      print_usage(argv[0]);
+      return EXIT_FAILURE;
+    }
+
+    Model arch = parse_arch(argv[2]);
+    synthetic_example(arch);
 
   } else {
     std::cerr << "Unknown command: " << command << std::endl;

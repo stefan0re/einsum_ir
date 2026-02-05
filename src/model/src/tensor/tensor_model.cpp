@@ -5,6 +5,8 @@ namespace einsum_ir::model::tensor {
   ModelResult estimate_performance(const TensorOperationConfig& config) {
     ModelResult result;
 
+    analyze_data_reuse(config);
+
     result.flops = compute_total_flops(config);
     result.time_seconds = get_kernel_time(config) * get_loop_iterations(config);
     result.gflops = result.flops / (result.time_seconds * 1.0e9);
@@ -54,14 +56,74 @@ namespace einsum_ir::model::tensor {
     return 0.0;
   }
 
-  void analyze_data_reuse(const TensorOperationConfig& config,
-                          double& o_reuse_in0,
-                          double& o_reuse_in1,
-                          double& o_reuse_out) {
-    (void)config;
-    o_reuse_in0 = 1.0;
-    o_reuse_in1 = 1.0;
-    o_reuse_out = 1.0;
+  void estimate_tensor_reuse(const TensorOperationConfig& config,
+                             int tensor_id,
+                             double& reuse_factor,
+                             int& level) {
+    // tenor id 0 -> in0
+    // tenor id 1 -> in1
+    // tenor id 2 -> out
+
+    dim_t x = dim_t::UNDEFINED_DIM;
+    switch (tensor_id) {
+      case 0:
+        x = dim_t::N;
+        break;
+      case 1:
+        x = dim_t::M;
+        break;
+      case 2:
+        x = dim_t::K;
+        break;
+      default:
+        std::cerr << "Wrong Tensor ID" << std::endl;
+        return;
+        break;
+    }
+
+    double current_size = 4.0;  // TODO
+    double iteration_todo = get_loop_iterations(config);
+
+    for (int i = config.dim_sizes.size() - 1; i >= 0; i--) {
+      std::cout << "iteration todo: " << iteration_todo << std::endl;
+      if ((config.exec_types[i] != exec_t::PRIM) && config.dim_types[i] == x) {
+        reuse_factor = 1.0 - (1.0 / config.dim_sizes[i]);
+        break;
+      }
+      if (config.dim_types[i] != x) {
+        current_size *= config.dim_sizes[i];
+      }
+      if (config.exec_types[i] == exec_t::SEQ) {
+        iteration_todo /= config.dim_sizes[i];
+      }
+    }
+
+    if (current_size < 1024 * 1024 * 8) {  // currently M4
+      level = 2;
+    }
+
+    std::cout << "------------------------" << std::endl;
+  }
+
+  void analyze_data_reuse(const TensorOperationConfig& config) {
+    double re_in0, re_in1, re_out = 0.0;
+    int lvl_in0, lvl_in1, lvl_out = 0;
+
+    estimate_tensor_reuse(config, 0, re_in0, lvl_in0);
+    estimate_tensor_reuse(config, 1, re_in1, lvl_in1);
+    estimate_tensor_reuse(config, 2, re_out, lvl_out);
+
+    std::cout << "IN0: " << std::endl;
+    std::cout << "  Reuse ratio: " << re_in0 << std::endl;
+    std::cout << "  Reuse level: " << lvl_in0 << std::endl;
+
+    std::cout << "IN1: " << std::endl;
+    std::cout << "  Reuse ratio: " << re_in1 << std::endl;
+    std::cout << "  Reuse level: " << lvl_in1 << std::endl;
+
+    std::cout << "OUT: " << std::endl;
+    std::cout << "  Reuse ratio: " << re_out << std::endl;
+    std::cout << "  Reuse level: " << lvl_out << std::endl;
   }
 
   double get_kernel_time(const TensorOperationConfig& config) {
