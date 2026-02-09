@@ -7,6 +7,7 @@
 
 namespace py  = pybind11;
 using einsum_ir::py::TensorOperation;
+using einsum_ir::py::Model;
 
 PYBIND11_MODULE(_etops_core, m) {
   py::enum_<TensorOperation::error_t>(m, "ErrorType")
@@ -42,6 +43,13 @@ PYBIND11_MODULE(_etops_core, m) {
     .value("m", TensorOperation::dim_t::m)
     .value("n", TensorOperation::dim_t::n)
     .value("k", TensorOperation::dim_t::k)
+    .export_values();
+
+  py::enum_<einsum_ir::py::model_t>(m, "MicroArch")
+    .value("zen5", einsum_ir::py::model_t::zen5)
+    .value("m4", einsum_ir::py::model_t::m4)
+    .value("a76", einsum_ir::py::model_t::a76)
+    .value("generic", einsum_ir::py::model_t::generic)
     .export_values();
 
   py::class_<TensorOperation>(m, "TensorOperation")
@@ -339,18 +347,33 @@ PYBIND11_MODULE(_etops_core, m) {
   py::class_<Model>(m, "Model")
     .def(
       py::init([](
-        Model::prim_t prim_main,
-        std::vector<Model::dim_t> const& dim_types,
-        std::vector<Model::exec_t> const& exec_types,
+        TensorOperation::prim_t prim_main,
+        std::vector<TensorOperation::dim_t> const& dim_types,
+        std::vector<TensorOperation::exec_t> const& exec_types,
         std::vector<int64_t> const& dim_sizes,
         std::vector<std::vector<std::vector<int64_t>>> const& strides,
-        Model::dtype_t dtype,
-        Model::model_t model_type,
+        TensorOperation::dtype_t dtype,
+        einsum_ir::py::model_t model_type,
         double peak_gflops,
         int vector_size
       ) {
-        return new Model(prim_main, dim_types, exec_types, dim_sizes, strides,
-                        dtype, model_type, peak_gflops, vector_size);
+        // Convert TensorOperation types to Model types
+        Model::prim_t model_prim = static_cast<Model::prim_t>(prim_main);
+        std::vector<Model::dim_t> model_dim_types;
+        model_dim_types.reserve(dim_types.size());
+        for (auto d : dim_types) {
+          model_dim_types.push_back(static_cast<Model::dim_t>(d));
+        }
+        std::vector<Model::exec_t> model_exec_types;
+        model_exec_types.reserve(exec_types.size());
+        for (auto e : exec_types) {
+          model_exec_types.push_back(static_cast<Model::exec_t>(e));
+        }
+        Model::dtype_t model_dtype = static_cast<Model::dtype_t>(dtype);
+
+        return new Model(model_prim, model_dim_types, model_exec_types,
+                        dim_sizes, strides, model_dtype, model_type,
+                        peak_gflops, vector_size);
       }),
       R"doc(
         Create a performance prediction model from tensor operation configuration.
@@ -372,8 +395,8 @@ PYBIND11_MODULE(_etops_core, m) {
       py::arg("exec_types"),
       py::arg("dim_sizes"),
       py::arg("strides"),
-      py::arg("dtype") = Model::dtype_t::fp32,
-      py::arg("model_type") = Model::model_t::generic,
+      py::arg("dtype") = TensorOperation::dtype_t::fp32,
+      py::arg("model_type") = einsum_ir::py::model_t::generic,
       py::arg("peak_gflops") = 0.0,
       py::arg("vector_size") = 0
     )

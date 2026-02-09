@@ -15,7 +15,7 @@ from ._etops_core import (
     ExecType        as _ExecType,
     DimType         as _DimType,
     ErrorType       as _ErrorType,
-    ModelType       as _MicroArch
+    MicroArch       as _MicroArch
 )
 
 # Make _ErrorType the *single* public alias
