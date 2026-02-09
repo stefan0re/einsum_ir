@@ -9,6 +9,7 @@ namespace einsum_ir::model::common {
                         int i_k,
                         int i_trans_a,
                         int i_trans_b,
+                        DType i_dtype,
                         Model i_model,
                         double& o_gflops,
                         double i_peak_gflops,
@@ -37,16 +38,16 @@ namespace einsum_ir::model::common {
     double gflops = 1.0;
     switch (i_model) {
       case Model::ZEN5:
-        gflops = einsum_ir::model::zen5::get_interpolated_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b);
+        gflops = einsum_ir::model::zen5::get_interpolated_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b, i_dtype);
         break;
       case Model::M4:
-        gflops = einsum_ir::model::m4::get_interpolated_gflops(i_m, i_n, i_k, i_trans_b);
+        gflops = einsum_ir::model::m4::get_interpolated_gflops(i_m, i_n, i_k, i_trans_b, i_dtype);
         break;
       case Model::A76:
-        gflops = einsum_ir::model::a76::get_interpolated_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b);
+        gflops = einsum_ir::model::a76::get_interpolated_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b, i_dtype);
         break;
       case Model::GENERIC:
-        gflops = einsum_ir::model::generic::get_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b, i_peak_gflops, i_vector_size);
+        gflops = einsum_ir::model::generic::get_gflops(i_m, i_n, i_k, i_trans_a, i_trans_b, i_dtype, i_peak_gflops, i_vector_size);
         break;
     }
     o_gflops = gflops;

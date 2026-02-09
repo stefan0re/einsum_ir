@@ -17,6 +17,9 @@ top_config = etops.TensorOperationConfig(
 # Create the TensorOperation instance
 top = etops.TensorOperation(top_config)
 
+# Create the Model for performance prediction (independent of TensorOperation)
+model = etops.Model(top_config, micro_arch=etops.arch.m4)
+
 # Create input and output arrays
 import numpy as np
 A = np.random.randn(512,512).astype(np.float32)
@@ -50,10 +53,11 @@ print("benchmark completed.")
 total_time = end_time - start_time
 
 avg_time_per_iter = total_time / num_iters
-estimated_time = top.model(etops.ModelType.m4)
+estimated_time = model.predict()
 
-gflops = (2.0 * 512 * 512 * 512) / (avg_time_per_iter * 1e9)
-es_gflops = (2.0 * 512 * 512 * 512) / (estimated_time * 1e9)
+flops = 512 * 512 * (512 + 511)
+gflops = flops / (avg_time_per_iter * 1e9)
+es_gflops = model.predict_gflops()
 
 print(f"Total time for {num_iters} iterations: {total_time:.8f} s")
 print("****************************")

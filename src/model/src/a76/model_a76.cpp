@@ -1,5 +1,6 @@
 #include "model_a76.h"
 
+#include "../common/common.h"
 #include "../common/interpolation.h"
 
 namespace einsum_ir::model::a76 {
@@ -233,7 +234,9 @@ namespace einsum_ir::model::a76 {
                                  int i_n,
                                  int i_k,
                                  int i_transpose_a,
-                                 int i_transpose_b) {
+                                 int i_transpose_b,
+                                 einsum_ir::model::common::DType i_dtype) {
+    (void)i_dtype;
     jit_sizes kernels;
 
     get_blocking(i_m,

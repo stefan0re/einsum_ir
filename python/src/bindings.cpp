@@ -3,6 +3,7 @@
 #include <pybind11/numpy.h>
 #include <set>
 #include "TensorOperation.h"
+#include "Model.h"
 
 namespace py  = pybind11;
 using einsum_ir::py::TensorOperation;
@@ -41,13 +42,6 @@ PYBIND11_MODULE(_etops_core, m) {
     .value("m", TensorOperation::dim_t::m)
     .value("n", TensorOperation::dim_t::n)
     .value("k", TensorOperation::dim_t::k)
-    .export_values();
-
-  py::enum_<TensorOperation::model_t>(m, "ModelType")
-    .value("zen5", TensorOperation::model_t::zen5)
-    .value("m4", TensorOperation::model_t::m4)
-    .value("a76", TensorOperation::model_t::a76)
-    .value("generic", TensorOperation::model_t::generic)
     .export_values();
 
   py::class_<TensorOperation>(m, "TensorOperation")
@@ -337,23 +331,68 @@ PYBIND11_MODULE(_etops_core, m) {
         :return: Dictionary containing default optimization parameters for the backend.
       )doc",
       py::arg("backend")
-    )
+    );
+
+  // Model class
+  using Model = einsum_ir::py::Model;
+
+  py::class_<Model>(m, "Model")
     .def(
-      "model",
-      &TensorOperation::model,
+      py::init([](
+        Model::prim_t prim_main,
+        std::vector<Model::dim_t> const& dim_types,
+        std::vector<Model::exec_t> const& exec_types,
+        std::vector<int64_t> const& dim_sizes,
+        std::vector<std::vector<std::vector<int64_t>>> const& strides,
+        Model::dtype_t dtype,
+        Model::model_t model_type,
+        double peak_gflops,
+        int vector_size
+      ) {
+        return new Model(prim_main, dim_types, exec_types, dim_sizes, strides,
+                        dtype, model_type, peak_gflops, vector_size);
+      }),
       R"doc(
-        Execute performance model for the GEMM primitive operation.
+        Create a performance prediction model from tensor operation configuration.
 
-        Estimates execution time using a performance model for the configured GEMM operation.
-        Only works for binary (GEMM) operations.
+        This class provides performance predictions for GEMM/BRGEMM operations.
 
-        :param model: The performance model to use (zen5, m4, a76, or generic).
-        :param peak_gflops: Optional peak GFLOPS for generic model (default: 0.0).
-        :param vector_size: Optional vector width for generic model (default: 0).
-        :return: Estimated execution time in seconds.
+        :param prim_main: The main primitive type (gemm or brgemm).
+        :param dim_types: Dimension types for each dimension.
+        :param exec_types: Execution types for each dimension.
+        :param dim_sizes: Sizes of each dimension.
+        :param strides: 3D stride tensor [LEVEL][TENSOR][DIMENSION].
+        :param dtype: The data type (fp32 or fp64).
+        :param model_type: The performance model to use (zen5, m4, a76, or generic).
+        :param peak_gflops: Peak GFLOPS for generic model (required if model_type is generic).
+        :param vector_size: Vector width for generic model (required if model_type is generic).
       )doc",
-      py::arg("model") = TensorOperation::model_t::generic,
+      py::arg("prim_main"),
+      py::arg("dim_types"),
+      py::arg("exec_types"),
+      py::arg("dim_sizes"),
+      py::arg("strides"),
+      py::arg("dtype") = Model::dtype_t::fp32,
+      py::arg("model_type") = Model::model_t::generic,
       py::arg("peak_gflops") = 0.0,
       py::arg("vector_size") = 0
+    )
+    .def(
+      "predict",
+      &Model::predict,
+      R"doc(
+        Predict the execution time for the tensor operation.
+
+        :return: Estimated execution time in seconds.
+      )doc"
+    )
+    .def(
+      "predict_gflops",
+      &Model::predict_gflops,
+      R"doc(
+        Predict the GFLOPS for a single GEMM operation.
+
+        :return: Estimated GFLOPS.
+      )doc"
     );
 }

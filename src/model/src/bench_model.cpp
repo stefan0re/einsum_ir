@@ -192,7 +192,7 @@ int main(int argc, char** argv) {
   double model_gflops = 0.0;
   double xsmm_gflops = 0.0;
 
-  double model_time = einsum_ir::model::common::get_time_model(m, n, k, trans_a, trans_b, model, model_gflops, peak_gflops, vector_size);
+  double model_time = einsum_ir::model::common::get_time_model(m, n, k, trans_a, trans_b,einsum_ir::model::common::DType::FP32, model, model_gflops, peak_gflops, vector_size);
   double xsmm_time = get_time_xsmm(m, n, k, trans_a, trans_b, xsmm_gflops);
 
   std::cout << "Model GFLOPS: " << model_gflops << std::endl;

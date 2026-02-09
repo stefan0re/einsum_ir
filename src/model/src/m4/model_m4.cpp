@@ -1,5 +1,6 @@
 #include "model_m4.h"
 
+#include "../common/common.h"
 #include "../common/interpolation.h"
 
 namespace einsum_ir::model::m4 {
@@ -43,7 +44,9 @@ namespace einsum_ir::model::m4 {
   double get_interpolated_gflops(int i_m,
                                  int i_n,
                                  int i_k,
-                                 int i_trans_b) {
+                                 int i_trans_b,
+                                 einsum_ir::model::common::DType i_dtype) {
+    (void)i_dtype;
     if (i_trans_b < 0) i_trans_b = 0;
     if (i_trans_b > 1) i_trans_b = 1;
 

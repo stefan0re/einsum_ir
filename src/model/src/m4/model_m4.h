@@ -5,6 +5,10 @@
 
 #include "bench_m4.h"
 
+namespace einsum_ir::model::common {
+  enum class DType;
+}
+
 namespace einsum_ir::model::m4 {
 
   /**
@@ -29,13 +33,15 @@ namespace einsum_ir::model::m4 {
    * @param i_n The N dimension size.
    * @param i_k The K dimension size.
    * @param i_trans_b The transpose flag for matrix B (0 or 1).
+   * @param i_dtype The data type (FP32 or FP64).
    *
    * @return The interpolated GFLOPS value.
    */
   double get_interpolated_gflops(int i_m,
                                  int i_n,
                                  int i_k,
-                                 int i_trans_b);
+                                 int i_trans_b,
+                                 einsum_ir::model::common::DType i_dtype);
 
 }  // namespace einsum_ir::model::m4
 

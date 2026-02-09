@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "../common/common.h"
+
 namespace einsum_ir::model::generic {
 
   double get_gflops(int i_m,
@@ -9,8 +11,10 @@ namespace einsum_ir::model::generic {
                     int i_k,
                     int i_trans_a,
                     int i_trans_b,
+                    einsum_ir::model::common::DType i_dtype,
                     double i_peak_gflops,
                     int i_vector_size) {
+    (void)i_dtype;
     double m_factor = 1.0f;
     double n_factor = 1.0f;
     double k_factor = 1.0f;

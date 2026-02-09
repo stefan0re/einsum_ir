@@ -1,5 +1,6 @@
 #include "model_zen5.h"
 
+#include "../common/common.h"
 #include "../common/interpolation.h"
 
 namespace einsum_ir::model::zen5 {
@@ -40,7 +41,8 @@ namespace einsum_ir::model::zen5 {
     t = (search_val - v_lower) / (v_upper - v_lower);
   }
 
-  double get_interpolated_gflops(int i_m, int i_n, int i_k, int i_trans_a, int i_trans_b) {
+  double get_interpolated_gflops(int i_m, int i_n, int i_k, int i_trans_a, int i_trans_b, einsum_ir::model::common::DType i_dtype) {
+    (void)i_dtype;
     if (i_trans_a < 0) i_trans_a = 0;
     if (i_trans_a > 1) i_trans_a = 1;
     if (i_trans_b < 0) i_trans_b = 0;

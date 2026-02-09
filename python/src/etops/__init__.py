@@ -9,12 +9,13 @@ except ImportError:
 
 from ._etops_core import (
     TensorOperation as _CppOp,
+    Model           as _CppModel,
     DataType        as _DataType,
     PrimType        as _PrimType,
     ExecType        as _ExecType,
     DimType         as _DimType,
     ErrorType       as _ErrorType,
-    ModelType       as _ModelType
+    ModelType       as _MicroArch
 )
 
 # Make _ErrorType the *single* public alias
@@ -25,7 +26,7 @@ DataType = _DataType
 PrimType = _PrimType
 ExecType = _ExecType
 DimType  = _DimType
-ModelType = _ModelType
+MicroArch = _MicroArch
 
 #: Alias for DataType
 dtype = DataType
@@ -111,16 +112,16 @@ class dim:
     def __dir__(cls):
         return cls.__all__
 
-class model:
-    """Namespace for performance model types."""
-    #: Alias for ModelType.zen5
-    zen5 = ModelType.zen5
-    #: Alias for ModelType.m4
-    m4 = ModelType.m4
-    #: Alias for ModelType.a76
-    a76 = ModelType.a76
-    #: Alias for ModelType.generic
-    generic = ModelType.generic
+class arch:
+    """Namespace for micro-architecture types for performance models."""
+    #: Alias for MicroArch.zen5
+    zen5 = MicroArch.zen5
+    #: Alias for MicroArch.m4
+    m4 = MicroArch.m4
+    #: Alias for MicroArch.a76
+    a76 = MicroArch.a76
+    #: Alias for MicroArch.generic
+    generic = MicroArch.generic
 
     __all__ = [
         "zen5",
@@ -317,6 +318,71 @@ class TensorOperation(_CppOp):
         if config is not None:
             config.apply(self)
 
+
+class Model:
+    """
+    Performance prediction model for tensor operations.
+
+    This class provides performance predictions for GEMM/BRGEMM operations.
+    It extracts the primitive dimensions (M, N, K, BR) and transpose flags
+    directly from the TensorOperationConfig.
+
+    Example:
+        >>> config = TensorOperationConfig(...)
+        >>> model = etops.Model(config, micro_arch=etops.arch.zen5)
+        >>> time = model.predict()
+    """
+
+    def __init__(
+        self,
+        config: TensorOperationConfig,
+        micro_arch: _MicroArch = _MicroArch.generic,
+        peak_gflops: float = 0.0,
+        vector_size: int = 0
+    ):
+        """
+        Create a performance prediction model from a TensorOperationConfig.
+
+        Args:
+            config: The tensor operation configuration.
+            micro_arch: The micro-architecture for the performance model (zen5, m4, a76, or generic).
+            peak_gflops: Peak GFLOPS for generic model (required if micro_arch is generic).
+            vector_size: Vector width in bytes for generic model (required if micro_arch is generic).
+        """
+        self._config = config
+
+        # Create the C++ Model object
+        self._cpp_model = _CppModel(
+            config.prim_main,
+            tuple(config.dim_types),
+            tuple(config.exec_types),
+            tuple(config.dim_sizes),
+            tuple(tuple(tuple(tensor) for tensor in level) for level in config.strides),
+            config.data_type,
+            micro_arch,
+            peak_gflops,
+            vector_size
+        )
+
+    def predict(self) -> float:
+        """
+        Predict the execution time for the tensor operation.
+
+        Returns:
+            Estimated execution time in seconds.
+        """
+        return self._cpp_model.predict()
+
+    def predict_gflops(self) -> float:
+        """
+        Predict the GFLOPS for a single GEMM operation.
+
+        Returns:
+            Estimated GFLOPS based on the performance model.
+        """
+        return self._cpp_model.predict_gflops()
+
+
 # Backend namespace
 class _TPPBackend:
     """TPP (Tensor Processing Primitives) backend for tensor operations."""
@@ -420,11 +486,12 @@ def optimize(
 __all__ = [
     "TensorOperation",
     "TensorOperationConfig",
+    "Model",
     "DataType",
     "PrimType",
     "ExecType",
     "DimType",
-    "ModelType",
+    "MicroArch",
     "dtype",
     "float32",
     "float64",
@@ -432,7 +499,7 @@ __all__ = [
     "etype",
     "exec",
     "dim",
-    "model",
+    "arch",
     "backend",
     "optimize",
     "ErrorType"

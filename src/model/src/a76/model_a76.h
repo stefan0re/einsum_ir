@@ -6,6 +6,10 @@
 
 #include "bench_a76.h"
 
+namespace einsum_ir::model::common {
+  enum class DType;
+}
+
 namespace einsum_ir::model::a76 {
 
   /**
@@ -107,13 +111,15 @@ namespace einsum_ir::model::a76 {
    * @param i_k The K dimension size.
    * @param i_transpose_a The transpose flag for matrix A (0 or 1).
    * @param i_transpose_b The transpose flag for matrix B (0 or 1).
+   * @param i_dtype The data type (FP32 or FP64).
    * @return The interpolated GFLOPS value.
    */
   double get_interpolated_gflops(int i_m,
                                  int i_n,
                                  int i_k,
                                  int i_transpose_a,
-                                 int i_transpose_b);
+                                 int i_transpose_b,
+                                 einsum_ir::model::common::DType i_dtype);
 
 }  // namespace einsum_ir::model::a76
 

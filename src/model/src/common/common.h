@@ -23,6 +23,14 @@ namespace einsum_ir::model::common {
   };
 
   /**
+   * Enum representing data types.
+   */
+  enum class DType {
+    FP32,
+    FP64
+  };
+
+  /**
    * Get the estimated execution time using a performance model.
    *
    * @param i_m The M dimension size.
@@ -30,6 +38,7 @@ namespace einsum_ir::model::common {
    * @param i_k The K dimension size.
    * @param i_trans_a The transpose flag for matrix A (0 or 1).
    * @param i_trans_b The transpose flag for matrix B (0 or 1).
+   * @param i_dtype The data type (FP32 or FP64).
    * @param i_model The performance model to use.
    * @param i_peak_gflops Optional peak GFLOPS for generic model (default: 0.0).
    * @param i_vector_size Optional vector width for generic model (default: 0).
@@ -42,6 +51,7 @@ namespace einsum_ir::model::common {
                         int i_k,
                         int i_trans_a,
                         int i_trans_b,
+                        DType i_dtype,
                         Model i_model,
                         double& o_gflops,
                         double i_peak_gflops = 0.0,

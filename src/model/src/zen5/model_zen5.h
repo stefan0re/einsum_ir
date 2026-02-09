@@ -5,6 +5,10 @@
 
 #include "bench_zen5.h"
 
+namespace einsum_ir::model::common {
+  enum class DType;
+}
+
 namespace einsum_ir::model::zen5 {
 
   /**
@@ -27,6 +31,7 @@ namespace einsum_ir::model::zen5 {
    * @param i_k The K dimension size.
    * @param i_trans_a The transpose flag for matrix A (0 or 1).
    * @param i_trans_b The transpose flag for matrix B (0 or 1).
+   * @param i_dtype The data type (FP32 or FP64).
    *
    * @return The interpolated GFLOPS value.
    */
@@ -34,7 +39,8 @@ namespace einsum_ir::model::zen5 {
                                  int i_n,
                                  int i_k,
                                  int i_trans_a,
-                                 int i_trans_b);
+                                 int i_trans_b,
+                                 einsum_ir::model::common::DType i_dtype);
 
 }  // namespace einsum_ir::model::zen5
 
