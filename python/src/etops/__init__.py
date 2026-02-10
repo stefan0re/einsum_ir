@@ -325,7 +325,7 @@ class Model:
 
     This class provides performance predictions for GEMM/BRGEMM operations.
     It extracts the primitive dimensions (M, N, K, BR) and transpose flags
-    directly from the TensorOperationConfig.
+    from the TensorOperationConfig.
 
     Example:
         >>> config = TensorOperationConfig(...)

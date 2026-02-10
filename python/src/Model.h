@@ -22,8 +22,7 @@ namespace einsum_ir {
     /**
      * Performance prediction model for tensor operations.
      *
-     * This class provides performance predictions for GEMM/BRGEMM operations
-     * without requiring the full TensorOperation backend to be set up.
+     * This class provides performance predictions for GEMM/BRGEMM operation.
      * It extracts the primitive dimensions (M, N, K, BR) and transpose flags
      * directly from the configuration parameters.
      */
@@ -71,13 +70,11 @@ namespace einsum_ir {
        * @param dim_types Dimension types for each dimension.
        * @param exec_types Execution types for each dimension.
        * @param dim_sizes Sizes of each dimension.
-       * @param strides 3D stride tensor [LEVEL][TENSOR][DIMENSION].
+       * @param strides 3D stride tensor.
        * @param dtype The data type (fp32 or fp64).
        * @param model_type The performance model to use.
        * @param peak_gflops Peak GFLOPS for generic model (required if model_type is generic).
        * @param vector_size Vector width for generic model (required if model_type is generic).
-       *
-       * @throws std::invalid_argument If configuration is invalid.
        */
       Model(prim_t prim_main,
             std::vector<dim_t> const& dim_types,
