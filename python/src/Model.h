@@ -22,9 +22,9 @@ namespace einsum_ir {
     /**
      * Performance prediction model for tensor operations.
      *
-     * This class provides performance predictions for GEMM/BRGEMM operation.
-     * It extracts the primitive dimensions (M, N, K, BR) and transpose flags
-     * directly from the configuration parameters.
+     * This class provides performance predictions for GEMM/BRGEMM operations.
+     * The Model is constructed with just the microarchitecture, and the
+     * predict() method takes the operation configuration.
      */
     class Model {
      public:
@@ -64,7 +64,18 @@ namespace einsum_ir {
       };
 
       /**
-       * Construct a Model from tensor operation configuration.
+       * Construct a Model with microarchitecture configuration.
+       *
+       * @param model_type The performance model to use (zen5, m4, a76, or generic).
+       * @param peak_gflops Peak GFLOPS for generic model (required if model_type is generic).
+       * @param vector_size Vector width for generic model (required if model_type is generic).
+       */
+      Model(model_t model_type = model_t::generic,
+            double peak_gflops = 0.0,
+            int vector_size = 0);
+
+      /**
+       * Predict the execution time for the tensor operation.
        *
        * @param prim_main The main primitive type (gemm or brgemm).
        * @param dim_types Dimension types for each dimension.
@@ -72,59 +83,40 @@ namespace einsum_ir {
        * @param dim_sizes Sizes of each dimension.
        * @param strides 3D stride tensor.
        * @param dtype The data type (fp32 or fp64).
-       * @param model_type The performance model to use.
-       * @param peak_gflops Peak GFLOPS for generic model (required if model_type is generic).
-       * @param vector_size Vector width for generic model (required if model_type is generic).
-       */
-      Model(prim_t prim_main,
-            std::vector<dim_t> const& dim_types,
-            std::vector<exec_t> const& exec_types,
-            std::vector<int64_t> const& dim_sizes,
-            std::vector<std::vector<std::vector<int64_t>>> const& strides,
-            dtype_t dtype = dtype_t::fp32,
-            model_t model_type = model_t::generic,
-            double peak_gflops = 0.0,
-            int vector_size = 0);
-
-      /**
-       * Predict the execution time for the tensor operation.
-       *
        * @return Estimated execution time in seconds.
        */
-      double predict() const;
+      double predict(prim_t prim_main,
+                     std::vector<dim_t> const& dim_types,
+                     std::vector<exec_t> const& exec_types,
+                     std::vector<int64_t> const& dim_sizes,
+                     std::vector<std::vector<std::vector<int64_t>>> const& strides,
+                     dtype_t dtype = dtype_t::fp32) const;
 
       /**
        * Predict the GFLOPS for a single GEMM operation.
        *
+       * @param prim_main The main primitive type (gemm or brgemm).
+       * @param dim_types Dimension types for each dimension.
+       * @param exec_types Execution types for each dimension.
+       * @param dim_sizes Sizes of each dimension.
+       * @param strides 3D stride tensor.
+       * @param dtype The data type (fp32 or fp64).
        * @return Estimated GFLOPS for one GEMM iteration.
        */
-      double predict_gflops() const;
-
-      // Getters for extracted parameters
-      int64_t get_m() const { return m_m; }
-      int64_t get_n() const { return m_n; }
-      int64_t get_k() const { return m_k; }
-      int64_t get_br() const { return m_br; }
-      bool get_trans_a() const { return m_trans_a; }
-      bool get_trans_b() const { return m_trans_b; }
-      int64_t get_gemm_iter() const { return m_gemm_iter; }
+      double predict_gflops(prim_t prim_main,
+                            std::vector<dim_t> const& dim_types,
+                            std::vector<exec_t> const& exec_types,
+                            std::vector<int64_t> const& dim_sizes,
+                            std::vector<std::vector<std::vector<int64_t>>> const& strides,
+                            dtype_t dtype = dtype_t::fp32) const;
 
      private:
-      /**
-       * Extract M, N, K, BR dimensions from configuration.
-       */
-      void extract_primitive_dims();
 
-      /**
-       * Extract transpose flags from stride patterns.
-       */
-      void extract_transpose_flags();
-
-      /**
-       * Compute number of GEMM iterations.
-       */
-      void compute_gemm_iter();
-
+      // Architecture configuration
+      model_t m_model_type;
+      double m_peak_gflops;
+      int m_vector_size;
+      
       /**
        * Convert model_t to common::Model.
        */
@@ -133,32 +125,35 @@ namespace einsum_ir {
       /**
        * Convert dtype_t to common::DType.
        */
-      einsum_ir::model::common::DType convert_dtype() const;
+      static einsum_ir::model::common::DType convert_dtype(dtype_t dtype);
 
-      // Configuration
-      prim_t m_prim_main;
-      std::vector<dim_t> m_dim_types;
-      std::vector<exec_t> m_exec_types;
-      std::vector<int64_t> m_dim_sizes;
-      std::vector<std::vector<std::vector<int64_t>>> m_strides;
-      dtype_t m_dtype;
-      model_t m_model_type;
-      double m_peak_gflops;
-      int m_vector_size;
+      /**
+       * Extract primitive dimensions from configuration.
+       */
+      static void extract_primitive_dims( prim_t prim_main,
+                                          std::vector<dim_t> const& dim_types,
+                                          std::vector<exec_t> const& exec_types,
+                                          std::vector<int64_t> const& dim_sizes,
+                                          int64_t& o_m,
+                                          int64_t& o_n,
+                                          int64_t& o_k,
+                                          int64_t& o_br);
 
-      // Extracted parameters
-      int64_t m_m;
-      int64_t m_n;
-      int64_t m_k;
-      int64_t m_br;
-      bool m_trans_a;
-      bool m_trans_b;
-      int64_t m_gemm_iter;
+      /**
+       * Extract transpose flags from stride patterns.
+       */
+      static void extract_transpose_flags( std::vector<dim_t> const& dim_types,
+                                           std::vector<exec_t> const& exec_types,
+                                           std::vector<std::vector<std::vector<int64_t>>> const& strides,
+                                           bool& o_trans_a,
+                                           bool& o_trans_b);
 
-      // Indices for M, N, K dimensions
-      int64_t m_m_idx;
-      int64_t m_n_idx;
-      int64_t m_k_idx;
+      /**
+       * Compute number of GEMM iterations.
+       */
+      static int64_t compute_gemm_iter( std::vector<exec_t> const& exec_types,
+                                        std::vector<int64_t> const& dim_sizes);
+
     };
 
   }  // namespace py

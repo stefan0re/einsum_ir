@@ -324,63 +324,73 @@ class Model:
     Performance prediction model for tensor operations.
 
     This class provides performance predictions for GEMM/BRGEMM operations.
-    It extracts the primitive dimensions (M, N, K, BR) and transpose flags
-    from the TensorOperationConfig.
+    The Model is constructed with just the microarchitecture, and the
+    predict() method takes the configuration.
 
     Example:
         >>> config = TensorOperationConfig(...)
-        >>> model = etops.Model(config, micro_arch=etops.arch.zen5)
-        >>> time = model.predict()
+        >>> model = etops.Model(micro_arch=etops.arch.m4)
+        >>> time = model.predict(config)
     """
 
     def __init__(
         self,
-        config: TensorOperationConfig,
         micro_arch: _MicroArch = _MicroArch.generic,
         peak_gflops: float = 0.0,
         vector_size: int = 0
     ):
         """
-        Create a performance prediction model from a TensorOperationConfig.
+        Create a performance prediction model with microarchitecture configuration.
 
         Args:
-            config: The tensor operation configuration.
             micro_arch: The micro-architecture for the performance model (zen5, m4, a76, or generic).
             peak_gflops: Peak GFLOPS for generic model (required if micro_arch is generic).
             vector_size: Vector width in bytes for generic model (required if micro_arch is generic).
         """
-        self._config = config
-
         # Create the C++ Model object
         self._cpp_model = _CppModel(
-            config.prim_main,
-            tuple(config.dim_types),
-            tuple(config.exec_types),
-            tuple(config.dim_sizes),
-            tuple(tuple(tuple(tensor) for tensor in level) for level in config.strides),
-            config.data_type,
             micro_arch,
             peak_gflops,
             vector_size
         )
 
-    def predict(self) -> float:
+    def predict(self, config: TensorOperationConfig) -> float:
         """
         Predict the execution time for the tensor operation.
+
+        Args:
+            config: The tensor operation configuration.
 
         Returns:
             Estimated execution time in seconds.
         """
-        return self._cpp_model.predict()
+        return self._cpp_model.predict(
+            config.prim_main,
+            tuple(config.dim_types),
+            tuple(config.exec_types),
+            tuple(config.dim_sizes),
+            tuple(tuple(tuple(tensor) for tensor in level) for level in config.strides),
+            config.data_type
+        )
 
-    def predict_gflops(self) -> float:
+    def predict_gflops(self, config: TensorOperationConfig) -> float:
         """
         Predict the GFLOPS for a single GEMM operation.
+
+        Args:
+            config: The tensor operation configuration.
 
         Returns:
             Estimated GFLOPS based on the performance model.
         """
-        return self._cpp_model.predict_gflops()
+        return self._cpp_model.predict_gflops(
+            config.prim_main,
+            tuple(config.dim_types),
+            tuple(config.exec_types),
+            tuple(config.dim_sizes),
+            tuple(tuple(tuple(tensor) for tensor in level) for level in config.strides),
+            config.data_type
+        )
 
 
 # Backend namespace
